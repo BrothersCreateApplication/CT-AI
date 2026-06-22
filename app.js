@@ -33,6 +33,16 @@ function resumeLearning() {
   navigate('chapter-' + lastCh);
 }
 
+function resetProgress() {
+  if (confirm('Reset all study progress? This will clear visited chapters, quiz history, and exam attempts.')) {
+    localStorage.removeItem('ctai_chapter_visits');
+    localStorage.removeItem('ctai_last_chapter');
+    localStorage.removeItem('ctai_quiz_history');
+    localStorage.removeItem('ctai_exam_history');
+    renderHomePage();
+  }
+}
+
 // ===== NAVIGATION =====
 function navigate(page) { window.location.hash = page; }
 window.addEventListener('hashchange', handleRoute);
@@ -114,6 +124,10 @@ function buildSidebar() {
   document.querySelectorAll('.sidebar-link').forEach(a => a.addEventListener('click', () => {
     if (window.innerWidth < 768) document.getElementById('sidebar')?.classList.remove('open');
   }));
+  // Tap main content to close sidebar on mobile
+  document.getElementById('main-content')?.addEventListener('click', () => {
+    if (window.innerWidth < 768) document.getElementById('sidebar')?.classList.remove('open');
+  });
   document.getElementById('btn-quick-quiz')?.addEventListener('click', () => showQuickPractice());
 }
 
@@ -195,6 +209,16 @@ function renderHomePage() {
   const visited = getVisitedChapters();
   const completedEl = document.getElementById('completed-chapters');
   if (completedEl) completedEl.textContent = visited.length + '/' + SYLLABUS_DATA.length;
+  // Quiz attempts
+  let totalQuizzes = 0;
+  for (let i = 1; i <= 7; i++) {
+    try {
+      const h = JSON.parse(localStorage.getItem('ctai_quiz_history') || '{}');
+      totalQuizzes += (h['ch' + i] || []).length;
+    } catch(e) {}
+  }
+  const quizEl = document.getElementById('quiz-attempts');
+  if (quizEl) quizEl.textContent = totalQuizzes;
 }
 
 function getDuration(c) { return ({1:'120 min',2:'45 min',3:'375 min',4:'195 min',5:'180 min',6:'225 min',7:'30 min'})[c]||''; }
@@ -1005,5 +1029,6 @@ window.toggleBilingualPdf = toggleBilingualPdf;
 window.renderFullExam = renderFullExam; window.submitFullExam = submitFullExam; window.retryFullExam = retryFullExam;
 window.onExamChange = onExamChange; window.toggleExamFlag = toggleExamFlag;
 window.resumeLearning = resumeLearning;
+window.resetProgress = resetProgress;
 
 document.addEventListener('DOMContentLoaded', init);
