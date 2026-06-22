@@ -466,7 +466,7 @@ function submitQuiz() {
       const isUser = u.includes(choice.key);
       const isRight = c.includes(choice.key);
       const icon = document.createElement('span');
-      icon.className = 'ml-auto text-sm';
+      icon.className = 'result-icon ml-auto text-sm';
       if (isRight && isUser) { icon.textContent = '✅'; label.style.borderColor = '#2e7d32'; label.style.background = '#e8f5e9'; }
       else if (isRight && !isUser) { icon.textContent = '✅'; label.style.borderColor = '#2e7d32'; }
       else if (!isRight && isUser) { icon.textContent = '❌'; label.style.borderColor = '#ba1a1a'; label.style.background = '#ffebee'; }
@@ -504,7 +504,7 @@ function submitQuiz() {
           <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${ringCirc}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
         </svg>
         <div class="text-2xl font-bold font-display -mt-16">${pct}%</div>
-        <span class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold ${pass ? 'bg-success-container text-success' : 'bg-error-container text-error'}">${pass ? 'PASS' : 'FAIL'}</span>
+        <span class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold" style="${pass ? 'background:#e8f5e9;color:#2e7d32' : 'background:#ffebee;color:#ba1a1a'}">${pass ? 'PASS' : 'FAIL'}</span>
         <p class="text-caption font-caption text-on-surface-variant mt-1">Required: 65%</p>
       </div>
       <div class="flex-1">
@@ -778,7 +778,7 @@ function submitFullExam() {
       const isUser = u.includes(choice.key);
       const isRight = c.includes(choice.key);
       const icon = document.createElement('span');
-      icon.className = 'ml-auto text-sm';
+      icon.className = 'result-icon ml-auto text-sm';
       if (isRight && isUser) { icon.textContent = '✅'; label.style.borderColor = '#2e7d32'; label.style.background = '#e8f5e9'; }
       else if (isRight && !isUser) { icon.textContent = '✅'; label.style.borderColor = '#2e7d32'; }
       else if (!isRight && isUser) { icon.textContent = '❌'; label.style.borderColor = '#ba1a1a'; label.style.background = '#ffebee'; }
@@ -830,7 +830,7 @@ function submitFullExam() {
           <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${ringCirc}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
         </svg>
         <div class="text-2xl font-bold font-display -mt-16">${pct}%</div>
-        <span class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold ${pass ? 'bg-success-container text-success' : 'bg-error-container text-error'}">${pass ? 'PASS' : 'FAIL'}</span>
+        <span class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold" style="${pass ? 'background:#e8f5e9;color:#2e7d32' : 'background:#ffebee;color:#ba1a1a'}">${pass ? 'PASS' : 'FAIL'}</span>
         <p class="text-caption font-caption text-on-surface-variant mt-1">Required: 65%</p>
       </div>
       <div class="flex-1">
