@@ -252,7 +252,7 @@ function renderChapter(n) {
     + '<h3 class="font-semibold mb-4">📖 Study Content</h3>'
     + '<p class="text-sm text-on-surface-variant mb-5">Open the syllabus PDF to read with original formatting, images, and tables.</p>'
     + '<div class="flex justify-center gap-4 flex-wrap">'
-    + '<a class="btn inline-flex items-center bg-secondary text-on-secondary px-6 py-3 rounded-lg font-bold scale-98-active no-underline" href="/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf#page=' + (pageMap[n] || 13) + '" target="_blank" rel="noopener noreferrer">📘 Học với English</a>'
+    + '<a class="btn inline-flex items-center bg-secondary text-on-secondary px-6 py-3 rounded-lg font-bold scale-98-active no-underline" href="/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + n + '#page=' + (pageMap[n] || 13) + '" target="_blank" rel="noopener noreferrer">📘 Học với English</a>'
     + '<a class="btn inline-flex items-center border-2 border-secondary text-secondary px-6 py-3 rounded-lg font-bold hover:bg-secondary hover:text-on-secondary transition-all scale-98-active no-underline" href="songngu.html?ch=' + n + '&page=1" target="_blank" rel="noopener noreferrer">📖 Học với Song ngữ</a>'
     + '</div></div>';
 
