@@ -173,20 +173,35 @@ function updateSidebar(hash) {
 // ===== HOME =====
 function renderHomePage() {
   const grid = document.getElementById('home-chapters');
-  const icons = ['info','psychology','biotech','quiz','database','model_training','deployed_code'];
-  const colors = ['#e3f2fd','#e3f2fd','#e3f2fd','#e3f2fd','#e3f2fd','#e3f2fd','#e3f2fd'];
+  const themes = [
+    { gradient: 'linear-gradient(135deg, #1e1b4b, #3730a3, #312e81)', icon: 'psychology', accent: '#c084fc', tag: 'Fundamentals' },
+    { gradient: 'linear-gradient(135deg, #064e3b, #047857, #065f46)', icon: 'verified', accent: '#34d399', tag: 'Quality' },
+    { gradient: 'linear-gradient(135deg, #7c2d12, #9a3412, #c2410c)', icon: 'neurology', accent: '#fb923c', tag: 'Algorithms' },
+    { gradient: 'linear-gradient(135deg, #0c4a6e, #075985, #0e7490)', icon: 'bug_report', accent: '#38bdf8', tag: 'Testing' },
+    { gradient: 'linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed)', icon: 'database', accent: '#a78bfa', tag: 'Data' },
+    { gradient: 'linear-gradient(135deg, #831843, #9d174d, #be185d)', icon: 'model_training', accent: '#f472b6', tag: 'Model' },
+    { gradient: 'linear-gradient(135deg, #164e63, #155e75, #0e7490)', icon: 'developer_mode', accent: '#22d3ee', tag: 'DevOps' }
+  ];
   grid.innerHTML = SYLLABUS_DATA.map(ch => {
+    const t = themes[ch.chapter - 1] || themes[0];
     const qs = QUESTIONS_DATA.filter(q => q.chapter === ch.chapter).length;
-    return `<div class="col-span-12 md:col-span-6 lg:col-span-4 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden cursor-pointer hover:border-secondary hover:shadow-md transition-all group" onclick="navigate('chapter-${ch.chapter}')">
-      <div class="h-28 flex items-center justify-center" style="background:${colors[ch.chapter-1]}">
-        <span class="material-symbols-outlined text-[40px] text-secondary/60">${icons[ch.chapter-1]}</span>
+    return `<div class="col-span-12 md:col-span-6 lg:col-span-4 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden cursor-pointer hover:border-[${t.accent}] hover:shadow-lg transition-all duration-300 group" onclick="navigate('chapter-${ch.chapter}')">
+      <div class="h-28 relative overflow-hidden flex items-center justify-center" style="background:${t.gradient}">
+        <!-- Decorative glow blobs -->
+        <div class="absolute w-24 h-24 rounded-full opacity-25" style="background:${t.accent};top:-30px;right:-10px;filter:blur(28px)"></div>
+        <div class="absolute w-20 h-20 rounded-full opacity-15" style="background:white;bottom:-25px;left:-15px;filter:blur(20px)"></div>
+        <div class="absolute w-12 h-12 rounded-full opacity-20" style="background:${t.accent};bottom:5px;right:15px;filter:blur(16px)"></div>
+        <!-- Icon -->
+        <span class="material-symbols-outlined relative z-10 text-white/85 transition-transform duration-300 group-hover:scale-110" style="font-size:46px;font-variation-settings:'FILL'1">${t.icon}</span>
+        <!-- Tag label -->
+        <span class="absolute bottom-1.5 left-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">${t.tag}</span>
       </div>
       <div class="p-4">
         <h4 class="font-semibold text-base mb-0.5">${ch.chapter}. ${ch.title}</h4>
         <p class="text-sm text-on-surface-variant">${ch.learningObjectives.length} learning objectives</p>
         <div class="flex justify-between items-center mt-3 text-xs">
           <span>⏱ ${getDuration(ch.chapter)}</span>
-          <span class="text-secondary font-medium">${qs} questions →</span>
+          <span class="font-medium" style="color:${t.accent}">${qs} questions →</span>
         </div>
       </div>
     </div>`;
