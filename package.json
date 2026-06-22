@@ -1,0 +1,12 @@
+{
+  "name": "ct-ai",
+  "version": "1.0.0",
+  "description": "CT-AI Foundation Study App",
+  "scripts": {
+    "build": "echo \"const APP_CONFIG = { GEMINI_API_KEY: '$GEMINI_API_KEY' };\" > config.js",
+    "vercel-build": "echo \"const APP_CONFIG = { GEMINI_API_KEY: '$GEMINI_API_KEY' };\" > config.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

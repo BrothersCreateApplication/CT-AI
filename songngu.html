@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CT-AI Academy - Song ngữ</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; font-family: Inter, sans-serif; }
+.toolbar {
+  height: 48px;
+  background: #f7f9fb;
+  border-bottom: 1px solid #c5c6cd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #191c1e;
+}
+.toolbar .lang { color: #0058bb; font-weight: 700; }
+.toolbar .close-btn {
+  padding: 4px 12px;
+  border: 1px solid #c5c6cd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  color: #44474d;
+  text-decoration: none;
+}
+.toolbar .close-btn:hover { background: #eceef0; }
+.panes {
+  display: flex;
+  height: calc(100vh - 48px);
+  width: 100%;
+}
+.pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.pane:first-child { border-right: 1px solid #c5c6cd; }
+.pane-label {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: #f2f4f6;
+  border-bottom: 1px solid #e0e3e5;
+  color: #44474d;
+}
+.pane-label .en { color: #0058bb; margin-right: 4px; }
+.pane-label .vn { color: #2e7d32; margin-right: 4px; }
+.pane iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <div><span class="lang">📖 Song ngữ</span> · English <span style="color:#0058bb">●</span> Tiếng Việt <span style="color:#2e7d32">●</span></div>
+  <div>
+    <span id="page-info" style="margin-right:12px;color:#44474d;font-weight:400;font-size:13px;"></span>
+    <a href="#" class="close-btn" onclick="window.close()">✕ Đóng</a>
+  </div>
+</div>
+<div class="panes">
+  <div class="pane">
+    <div class="pane-label"><span class="en">📄 English</span> Original Syllabus</div>
+    <iframe id="en-frame" allowfullscreen></iframe>
+  </div>
+  <div class="pane">
+    <div class="pane-label"><span class="vn">📄 Tiếng Việt</span> Bản dịch</div>
+    <iframe id="vn-frame" allowfullscreen></iframe>
+  </div>
+</div>
+<script>
+// Get page parameter from URL
+var params = new URLSearchParams(window.location.search);
+var page = params.get('page') || '1';
+var chapter = params.get('ch') || '1';
+
+document.getElementById('page-info').textContent = 'Chapter ' + chapter + ' · Page ' + page;
+
+// Map chapter numbers to starting pages
+var pageMap = {1:13, 2:20, 3:25, 4:37, 5:45, 6:53, 7:62};
+var startPage = pageMap[chapter] || 13;
+var pdfPage = parseInt(page) + startPage - 1;
+
+document.getElementById('en-frame').src = 'ISTQB-_CTAI_Syllabus_v2.0_Release.pdf#page=' + pdfPage;
+document.getElementById('vn-frame').src = 'ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf#page=' + pdfPage;
+</script>
+</body>
+</html>

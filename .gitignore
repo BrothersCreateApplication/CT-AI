@@ -1,0 +1,13 @@
+node_modules/
+.claude/
+design/
+*.txt
+*.mjs
+*.zip
+!package.json
+!package-lock.json
+translation_data.json
+DESIGN.md
+code.html
+screen.png
+config.js
