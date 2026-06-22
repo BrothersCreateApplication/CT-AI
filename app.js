@@ -275,7 +275,7 @@ function renderChapter(n) {
   const ch = SYLLABUS_DATA.find(c => c.chapter === n);
   if (!ch) { document.getElementById('chapter-content').innerHTML = '<p class="text-on-surface-variant">Chapter not found.</p>'; return; }
   const qs = QUESTIONS_DATA.filter(q => q.chapter === n).length;
-  const pageMap = {1:13, 2:20, 3:25, 4:37, 5:45, 6:53, 7:62};
+  const pageMap = {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63};
 
   let html = '<div class="mb-5 pb-4 border-b border-outline-variant">'
     + '<span class="text-caption font-caption text-secondary font-semibold tracking-wider">CHAPTER ' + n + ' · ' + getDuration(n) + '</span>'

@@ -93,7 +93,7 @@ var chapter = params.get('ch') || '1';
 document.getElementById('page-info').textContent = 'Chapter ' + chapter + ' · Page ' + page;
 
 // Map chapter numbers to starting pages
-var pageMap = {1:13, 2:20, 3:25, 4:37, 5:45, 6:53, 7:62};
+var pageMap = {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63};
 var startPage = pageMap[chapter] || 13;
 var pdfPage = parseInt(page) + startPage - 1;
 
