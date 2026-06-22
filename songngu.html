@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CT-AI Academy - Song ngữ</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; font-family: Inter, sans-serif; }
@@ -14,12 +16,39 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, sans-serif; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 16px;
   font-size: 14px;
   font-weight: 600;
   color: #191c1e;
 }
 .toolbar .lang { color: #0058bb; font-weight: 700; }
+.toolbar-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.toolbar-center button {
+  background: none;
+  border: 1px solid #c5c6cd;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 4px 10px;
+  font-size: 18px;
+  color: #44474d;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.toolbar-center button:hover { background: #e6e8ea; border-color: #0058bb; color: #0058bb; }
+.toolbar-center .page-indicator {
+  font-size: 13px;
+  font-weight: 500;
+  color: #44474d;
+  min-width: 120px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+}
 .toolbar .close-btn {
   padding: 4px 12px;
   border: 1px solid #c5c6cd;
@@ -64,17 +93,38 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, sans-serif; }
   width: 100%;
   height: 100%;
 }
+.scroll-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+  z-index: 10;
+}
+.scroll-hint.show { opacity: 1; }
 </style>
 </head>
 <body>
 <div class="toolbar">
   <div><span class="lang">📖 Song ngữ</span> · English <span style="color:#0058bb">●</span> Tiếng Việt <span style="color:#2e7d32">●</span></div>
+  <div class="toolbar-center">
+    <button id="btn-prev" title="Previous (←)"><span class="material-symbols-outlined" style="font-size:20px">chevron_left</span></button>
+    <span class="page-indicator" id="page-info">Chapter 1 · Page 1</span>
+    <button id="btn-next" title="Next (→)"><span class="material-symbols-outlined" style="font-size:20px">chevron_right</span></button>
+  </div>
   <div>
-    <span id="page-info" style="margin-right:12px;color:#44474d;font-weight:400;font-size:13px;"></span>
     <a href="#" class="close-btn" onclick="window.close()">✕ Đóng</a>
   </div>
 </div>
-<div class="panes">
+<div class="panes" id="panes-container">
   <div class="pane">
     <div class="pane-label"><span class="en">📄 English</span> Original Syllabus</div>
     <iframe id="en-frame" allowfullscreen></iframe>
@@ -84,22 +134,74 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, sans-serif; }
     <iframe id="vn-frame" allowfullscreen></iframe>
   </div>
 </div>
+<div class="scroll-hint" id="scroll-hint">Scroll to flip pages · ← → keys</div>
 <script>
-// Get page parameter from URL
 var params = new URLSearchParams(window.location.search);
-var page = params.get('page') || '1';
+var currentPage = parseInt(params.get('page')) || 1;
 var chapter = params.get('ch') || '1';
 
-document.getElementById('page-info').textContent = 'Chapter ' + chapter + ' · Page ' + page;
-
-// Map chapter numbers to starting pages
 var pageMap = {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63};
-var startPage = pageMap[chapter] || 13;
-var pdfPage = parseInt(page) + startPage - 1;
+var startPage = pageMap[chapter] || 14;
+var chapterTitles = {1:'Introduction to AI',2:'Quality for AI',3:'Machine Learning',4:'Testing AI',5:'Input Data Testing',6:'Model Testing',7:'ML Development'};
+var pageSize = {1:7, 2:5, 3:12, 4:8, 5:8, 6:9, 7:2};
 
-var t = Date.now();
-document.getElementById('en-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + chapter + '&t=' + t + '#page=' + pdfPage;
-document.getElementById('vn-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?ch=' + chapter + '&t=' + t + '#page=' + pdfPage;
+function loadPages() {
+  var pdfPage = startPage + currentPage - 1;
+  var t = Date.now();
+  document.getElementById('en-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + chapter + '&p=' + currentPage + '&t=' + t + '#page=' + pdfPage;
+  document.getElementById('vn-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?ch=' + chapter + '&p=' + currentPage + '&t=' + t + '#page=' + pdfPage;
+  document.getElementById('page-info').textContent = 'Ch' + chapter + ' · Page ' + currentPage + '/' + (pageSize[chapter] || 15) + '  (' + pdfPage + ')';
+}
+
+function prevPage() {
+  if (currentPage > 1) { currentPage--; loadPages(); }
+}
+function nextPage() {
+  if (currentPage < (pageSize[chapter] || 15)) { currentPage++; loadPages(); }
+}
+
+document.getElementById('btn-prev').onclick = prevPage;
+document.getElementById('btn-next').onclick = nextPage;
+
+// Keyboard: ← → arrows
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); nextPage(); }
+});
+
+// Scroll wheel on the panes container → flip pages
+var scrollTimeout = null;
+document.getElementById('panes-container').addEventListener('wheel', function(e) {
+  e.preventDefault();
+  if (scrollTimeout) return;
+  scrollTimeout = setTimeout(function() { scrollTimeout = null; }, 400);
+  if (e.deltaY > 0) nextPage();
+  else prevPage();
+}, { passive: false });
+
+// Show hint on first load, hide after 3s
+setTimeout(function() {
+  var hint = document.getElementById('scroll-hint');
+  hint.classList.add('show');
+  setTimeout(function() { hint.classList.remove('show'); }, 3000);
+}, 500);
+
+// Touch swipe support for mobile
+var touchStartX = 0, touchStartY = 0;
+document.getElementById('panes-container').addEventListener('touchstart', function(e) {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+document.getElementById('panes-container').addEventListener('touchend', function(e) {
+  var dx = e.changedTouches[0].screenX - touchStartX;
+  var dy = e.changedTouches[0].screenY - touchStartY;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    if (dx < 0) nextPage();
+    else prevPage();
+  }
+}, { passive: true });
+
+loadPages();
 </script>
 </body>
 </html>
