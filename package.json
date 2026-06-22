@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "CT-AI Foundation Study App",
   "scripts": {
-    "build": "echo \"const APP_CONFIG = { GEMINI_API_KEY: '$GEMINI_API_KEY' };\" > config.js",
-    "vercel-build": "echo \"const APP_CONFIG = { GEMINI_API_KEY: '$GEMINI_API_KEY' };\" > config.js"
+    "build": "echo Build complete",
+    "vercel-build": "echo Build complete"
   },
   "keywords": [],
   "author": "",

@@ -1,21 +1,7 @@
 // CT-AI Academy - Study Application
 // Design: Academic, Precise, Future-Proof
 
-var GEMINI_API_KEY = '';
-if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GEMINI_API_KEY) {
-  GEMINI_API_KEY = APP_CONFIG.GEMINI_API_KEY;
-} else if (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) {
-  GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-}
-
-const CONFIG = {
-  GEMINI_API_KEY: GEMINI_API_KEY,
-  GEMINI_URL: 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
-  CACHE_MAX: 100
-};
-
-const AppState = { currentPage: 'home', currentChapter: null, quizSubmitted: false, selectedText: '' };
-const GeminiCache = new Map();
+const AppState = { currentPage: 'home', currentChapter: null };
 
 // ===== PROGRESS TRACKING =====
 function trackChapterVisit(chapter) {
@@ -46,63 +32,6 @@ function resumeLearning() {
   const lastCh = getLastVisitedChapter();
   navigate('chapter-' + lastCh);
 }
-
-function getStudyContext() {
-  const ch = AppState.currentChapter;
-  const chData = ch ? SYLLABUS_DATA.find(c => c.chapter === ch) : null;
-  return chData ? `Student is studying Chapter ${ch}: "${chData.title}" for ISTQB CT-AI Foundation.`
-    : 'Student is studying for ISTQB CT-AI Foundation certification.';
-}
-
-const Gemini = {
-  async call(prompt, text, opts) {
-    opts = opts || {};
-    const key = prompt.slice(0,50) + '|' + (text||'').slice(0,100);
-    if (GeminiCache.has(key)) return GeminiCache.get(key);
-    try {
-      const r = await fetch(CONFIG.GEMINI_URL + '?key=' + CONFIG.GEMINI_API_KEY, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({contents:[{parts:[{text:prompt + '\n\n' + text}]}], generationConfig:{temperature:opts.temperature||0.4, maxOutputTokens:opts.maxTokens||1024}})
-      });
-      if (!r.ok) throw new Error('API ' + r.status + ': ' + (await r.text()).slice(0,200));
-      const d = await r.json();
-      const res = d.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
-      if (GeminiCache.size >= CONFIG.CACHE_MAX) GeminiCache.delete(GeminiCache.keys().next().value);
-      GeminiCache.set(key, res); return res;
-    } catch(e) { console.error(e); throw e; }
-  },
-
-  async callWithImage(prompt, base64Image, mimeType) {
-    try {
-      const r = await fetch(CONFIG.GEMINI_URL + '?key=' + CONFIG.GEMINI_API_KEY, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({contents:[{parts:[
-          {text: prompt},
-          {inlineData: {mimeType: mimeType || 'image/png', data: base64Image}}
-        ]}], generationConfig:{temperature:0.4, maxOutputTokens:2048}})
-      });
-      if (!r.ok) throw new Error('API ' + r.status + ': ' + (await r.text()).slice(0,200));
-      const d = await r.json();
-      return d.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
-    } catch(e) { console.error(e); throw e; }
-  },
-  async explain(text) {
-    return this.call(`You are an ISTQB CT-AI tutor. ${getStudyContext()}
-Explain in SIMPLE Vietnamese. Keep technical terms in English. Use examples. Concise (1-3 paragraphs).`, text, {temperature:0.5});
-  },
-  async askQuestion(question, context) {
-    return this.call(`You are an expert ISTQB CT-AI tutor. ${getStudyContext()}
-Context: ${context||'none'}
-Answer in Vietnamese, keep technical terms in English. Base on syllabus. Be concise.`, question, {temperature:0.5, maxTokens:2048});
-  },
-  async explainQuizQuestion(qText, correct, rationale) {
-    return this.call(`ISTQB CT-AI tutor. ${getStudyContext()}
-Explain in Vietnamese why the correct answer is right.
-Question: ${qText}
-Answer: ${correct}
-Rationale: ${rationale}`, '', {temperature:0.4});
-  }
-};
 
 // ===== NAVIGATION =====
 function navigate(page) { window.location.hash = page; }
@@ -596,19 +525,6 @@ function showRationale(q, ans, userK, correctK) {
   div.classList.remove('hidden');
 }
 
-async function explainQ(id) {
-  const q = quizState.questions.find(x=>String(x.id)===String(id));
-  if (!q) return;
-  const ans = ANSWERS_DATA[id];
-  const div = document.getElementById(`explain-q${id}`);
-  if (!div) return;
-  div.innerHTML = '<div class="flex items-center gap-2 text-sm text-on-surface-variant"><div class="w-3 h-3 border-2 border-outline-variant border-t-secondary rounded-full animate-spin"></div> Explaining...</div>';
-  try {
-    const exp = await Gemini.explainQuizQuestion(q.text, ans?.correct.join(', '), ans?.rationale ? Object.values(ans.rationale).join(' ') : '');
-    div.innerHTML = `<div class="p-3 bg-[#f3e5f5] rounded-lg text-sm">${exp.replace(/\n/g,'<br>')}</div>`;
-  } catch(e) { div.innerHTML = `<div class="text-error text-sm">Error: ${e.message}</div>`; }
-}
-
 function retryQuiz() {
   if (quizState.chapterNum) {
     var ch = quizState.chapterNum;
@@ -1037,59 +953,7 @@ function showQuickPractice() {
   overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
 }
 
-// ===== AI POPUP =====
-function openAiPopup(ctx) {
-  document.getElementById('ai-popup').classList.remove('hidden');
-  document.getElementById('ai-popup').classList.add('flex');
-  if (ctx) document.getElementById('ai-context-text').textContent = `"${ctx.slice(0,80)}${ctx.length>80?'...':''}"`;
-  setTimeout(() => document.getElementById('ai-input')?.focus(), 100);
-}
-function closeAiPopup() {
-  document.getElementById('ai-popup').classList.add('hidden');
-  document.getElementById('ai-popup').classList.remove('flex');
-}
-async function sendAiQuestion() {
-  const input = document.getElementById('ai-input');
-  const q = input.value.trim();
-  if (!q) return;
-  const ctx = document.getElementById('ai-context-text').textContent;
-  const result = document.getElementById('ai-result');
-  const load = document.getElementById('ai-loading');
-  result.innerHTML = ''; load.classList.remove('hidden'); load.style.display = 'flex';
-  try {
-    const a = await Gemini.askQuestion(q, ctx);
-    load.classList.add('hidden'); load.style.display = '';
-    result.innerHTML = `<div class="mb-3 p-2.5 bg-surface-container rounded-lg text-sm"><strong>You:</strong> ${q}</div>
-      <div class="p-2.5 bg-[#f3e5f5] rounded-lg text-sm">${a.replace(/\n/g,'<br>')}</div>`;
-    input.value = '';
-  } catch(e) {
-    load.classList.add('hidden'); load.style.display = '';
-    result.innerHTML = `<div class="text-error text-sm">⚠️ ${e.message}</div>`;
-  }
-}
-
-// ===== SELECTION POPUP =====
-function initSelectionPopup() {
-  const popup = document.getElementById('selection-popup');
-  document.addEventListener('mouseup', (e) => {
-    if (popup.contains(e.target)) return;
-    const sel = window.getSelection();
-    const text = sel.toString().trim();
-    if (!text || text.length < 5) {
-      popup.classList.add('hidden'); return;
-    }
-    const r = sel.getRangeAt(0).getBoundingClientRect();
-    popup.style.top = `${r.bottom + window.scrollY + 5}px`;
-    popup.style.left = `${r.left + window.scrollX}px`;
-    popup.classList.remove('hidden');
-    AppState.selectedText = text;
-  });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { popup.classList.add('hidden'); closeAiPopup(); } });
-}
-
-function explainSelection() {
-  if (AppState.selectedText) { openAiPopup(AppState.selectedText); document.getElementById('selection-popup').classList.add('hidden'); }
-}
+// ===== AI POPUP (removed) =====
 
 // ===== SEARCH =====
 function initSearch() {
@@ -1128,11 +992,6 @@ function init() {
   buildSidebar();
   renderHomePage();
   initSearch();
-  initSelectionPopup();
-
-  document.getElementById('btn-ai-send')?.addEventListener('click', sendAiQuestion);
-  document.getElementById('ai-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendAiQuestion(); });
-
   handleRoute();
   console.log(`✅ CT-AI Academy: ${SYLLABUS_DATA.length} chapters, ${QUESTIONS_DATA.length} questions`);
 }
@@ -1140,9 +999,7 @@ function init() {
 // Globals
 window.navigate = navigate; window.setActiveNav = setActiveNav;
 window.onQuizChange = onQuizChange; window.submitQuiz = submitQuiz; window.retryQuiz = retryQuiz;
-window.explainQ = explainQ; window.toggleFlag = toggleFlag;
-window.openAiPopup = openAiPopup; window.closeAiPopup = closeAiPopup; window.sendAiQuestion = sendAiQuestion;
-window.explainSelection = explainSelection;
+window.toggleFlag = toggleFlag;
 window.showQuickPractice = showQuickPractice;
 window.toggleBilingualPdf = toggleBilingualPdf;
 window.renderFullExam = renderFullExam; window.submitFullExam = submitFullExam; window.retryFullExam = retryFullExam;
