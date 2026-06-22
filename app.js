@@ -183,33 +183,30 @@ function renderHomePage() {
     </div>`;
   }).join('');
 
-  document.getElementById('total-questions-count').textContent = QUESTIONS_DATA.length;
-  document.getElementById('total-chapters').textContent = SYLLABUS_DATA.length;
-  // Exam attempts
-  const examHistory = getExamHistory();
-  const examAttEl = document.getElementById('exam-attempts-count');
-  if (examAttEl) examAttEl.textContent = examHistory.length;
   const fullExamCountEl = document.getElementById('full-exam-count');
   if (fullExamCountEl) fullExamCountEl.textContent = QUESTIONS_DATA.length;
 
-  // Progress tracking — Resume button
+  // Progress ring + resume button
   const prog = getStudyProgress();
-  const progEl = document.getElementById('overall-progress');
-  const fillEl = document.getElementById('overall-fill');
-  if (progEl) progEl.textContent = prog.pct + '%';
-  if (fillEl) fillEl.style.width = prog.pct + '%';
+  const ring = document.getElementById('hero-progress-ring');
+  if (ring) {
+    const circ = 2 * Math.PI * 42; // r=42
+    const offset = circ - (prog.pct / 100) * circ;
+    ring.style.strokeDasharray = circ;
+    ring.style.strokeDashoffset = offset;
+    ring.parentElement.nextElementSibling.textContent = prog.pct + '%';
+  }
   const btnResume = document.getElementById('btn-resume');
   if (btnResume) {
     btnResume.onclick = resumeLearning;
     const lastCh = getLastVisitedChapter();
     const chTitle = SYLLABUS_DATA.find(c => c.chapter === lastCh)?.title || '';
-    btnResume.innerHTML = 'Continue Ch.' + lastCh + ' <span class="text-xs font-normal opacity-70 ml-1">' + (chTitle.length > 30 ? chTitle.slice(0,30)+'…' : chTitle) + '</span><span class="material-symbols-outlined text-[20px] ml-1">arrow_forward</span>';
+    btnResume.innerHTML = 'Ch.' + lastCh + ' <span class="text-xs font-normal opacity-70">' + (chTitle.length > 35 ? chTitle.slice(0,35)+'…' : chTitle) + '</span> <span class="material-symbols-outlined text-[18px]">arrow_forward</span>';
   }
-  // Chapter stats
+  // Stats
   const visited = getVisitedChapters();
   const completedEl = document.getElementById('completed-chapters');
   if (completedEl) completedEl.textContent = visited.length + '/' + SYLLABUS_DATA.length;
-  // Quiz attempts
   let totalQuizzes = 0;
   for (let i = 1; i <= 7; i++) {
     try {
@@ -239,16 +236,23 @@ function renderChapter(n) {
 
   if (ch.keywords && ch.keywords.length) {
     const kw = ch.keywords.join(',').split(',').map(k=>k.trim()).filter(k=>k);
-    html += '<div class="flex flex-wrap gap-2 mb-4">' + kw.map(k=>'<span class="px-3 py-1 bg-surface-container rounded-full text-xs font-medium text-on-surface-variant">' + k + '</span>').join('') + '</div>';
+    if (kw.length) {
+      html += '<div class="flex flex-wrap gap-1.5 mb-4">' + kw.slice(0,12).map(k=>'<span class="px-2.5 py-0.5 bg-surface-container rounded-full text-xs text-on-surface-variant">' + k + '</span>').join('') + (kw.length > 12 ? '<span class="px-2.5 py-0.5 text-xs text-on-surface-variant">+'+(kw.length-12)+'</span>' : '') + '</div>';
+    }
   }
 
   if (ch.learningObjectives && ch.learningObjectives.length) {
-    html += '<div class="bg-warning-container border border-orange-200 rounded-lg p-4 mb-5"><h3 class="text-sm font-semibold text-warning mb-2">🎯 Learning Objectives</h3><ul class="space-y-1">';
+    html += '<details class="bg-amber-50 border border-amber-200 rounded-lg mb-5 overflow-hidden">'
+      + '<summary class="text-sm font-semibold text-amber-800 px-4 py-3 cursor-pointer hover:bg-amber-100/50 transition-colors select-none flex items-center gap-2">'
+      + '<span class="material-symbols-outlined text-[18px]">emoji_objects</span> Learning Objectives (' + ch.learningObjectives.length + ')'
+      + '<span class="ml-auto text-xs text-amber-600 font-normal">click to expand</span>'
+      + '</summary>'
+      + '<div class="px-4 pb-3 pt-1"><ul class="space-y-1">';
     ch.learningObjectives.forEach(lo => {
       const m = lo.match(/^(AI-\S+)\s+(\(K\d\))\s+(.+)/);
-      html += '<li class="text-sm text-on-surface-variant">' + (m ? '<span class="font-semibold text-on-surface">' + m[1] + '</span> ' + m[3] + ' <em>' + m[2] + '</em>' : lo) + '</li>';
+      html += '<li class="text-sm text-on-surface-variant">' + (m ? '<span class="font-semibold text-on-surface">' + m[1] + '</span> ' + m[3] + ' <em class="text-xs text-amber-700">' + m[2] + '</em>' : lo) + '</li>';
     });
-    html += '</ul></div>';
+    html += '</ul></div></details>';
   }
 
   // Study buttons - open PDF in new window

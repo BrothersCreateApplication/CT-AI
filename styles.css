@@ -797,6 +797,7 @@ a:hover { text-decoration: underline; }
   .bento-section-title { font-size: 20px; }
   .glass-card { flex-direction: column !important; }
   .glass-card .btn { width: 100%; justify-content: center; }
+  .bento-grid > div:first-child { min-height: 140px !important; }
   .stats-row { gap: var(--space-sm); }
   .stat-card { font-size: 12px; padding: 6px 12px; }
   #full-exam-content, #quiz-content { flex-direction: column; }
