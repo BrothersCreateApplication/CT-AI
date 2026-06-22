@@ -17,6 +17,36 @@ const CONFIG = {
 const AppState = { currentPage: 'home', currentChapter: null, quizSubmitted: false, selectedText: '' };
 const GeminiCache = new Map();
 
+// ===== PROGRESS TRACKING =====
+function trackChapterVisit(chapter) {
+  if (!chapter) return;
+  try {
+    const visits = JSON.parse(localStorage.getItem('ctai_chapter_visits') || '[]');
+    if (!visits.includes(chapter)) visits.push(chapter);
+    localStorage.setItem('ctai_chapter_visits', JSON.stringify(visits));
+    localStorage.setItem('ctai_last_chapter', String(chapter));
+  } catch(e) { /* ignore */ }
+}
+
+function getLastVisitedChapter() {
+  try { return parseInt(localStorage.getItem('ctai_last_chapter')) || 1; } catch(e) { return 1; }
+}
+
+function getVisitedChapters() {
+  try { return JSON.parse(localStorage.getItem('ctai_chapter_visits') || '[]'); } catch(e) { return []; }
+}
+
+function getStudyProgress() {
+  const visited = getVisitedChapters();
+  const total = SYLLABUS_DATA.length;
+  return { visited: visited.length, total, pct: total > 0 ? Math.round((visited.length / total) * 100) : 0 };
+}
+
+function resumeLearning() {
+  const lastCh = getLastVisitedChapter();
+  navigate('chapter-' + lastCh);
+}
+
 function getStudyContext() {
   const ch = AppState.currentChapter;
   const chData = ch ? SYLLABUS_DATA.find(c => c.chapter === ch) : null;
@@ -97,6 +127,7 @@ function handleRoute() {
     document.getElementById('page-chapter').classList.add('active');
     document.querySelector('.nav-link[href="#chapter-1"]')?.classList.add('border-secondary', 'text-secondary');
     AppState.currentPage = 'chapter'; AppState.currentChapter = parseInt(cm[1]);
+    trackChapterVisit(parseInt(cm[1]));
     renderChapter(AppState.currentChapter);
     document.getElementById('fab-quiz')?.classList.remove('hidden');
     document.getElementById('fab-quiz').onclick = () => navigate(`quiz-${cm[1]}`);
@@ -106,6 +137,7 @@ function handleRoute() {
     document.getElementById('page-quiz').classList.add('active');
     document.querySelector('.nav-link[href="#quiz-1"]')?.classList.add('border-secondary', 'text-secondary');
     AppState.currentPage = 'quiz'; AppState.currentChapter = parseInt(qm[1]);
+    trackChapterVisit(parseInt(qm[1]));
     renderQuiz(AppState.currentChapter); return;
   }
   if (hash === 'full-exam') {
@@ -215,6 +247,24 @@ function renderHomePage() {
   if (examAttEl) examAttEl.textContent = examHistory.length;
   const fullExamCountEl = document.getElementById('full-exam-count');
   if (fullExamCountEl) fullExamCountEl.textContent = QUESTIONS_DATA.length;
+
+  // Progress tracking — Resume button
+  const prog = getStudyProgress();
+  const progEl = document.getElementById('overall-progress');
+  const fillEl = document.getElementById('overall-fill');
+  if (progEl) progEl.textContent = prog.pct + '%';
+  if (fillEl) fillEl.style.width = prog.pct + '%';
+  const btnResume = document.getElementById('btn-resume');
+  if (btnResume) {
+    btnResume.onclick = resumeLearning;
+    const lastCh = getLastVisitedChapter();
+    const chTitle = SYLLABUS_DATA.find(c => c.chapter === lastCh)?.title || '';
+    btnResume.innerHTML = 'Continue Ch.' + lastCh + ' <span class="text-xs font-normal opacity-70 ml-1">' + (chTitle.length > 30 ? chTitle.slice(0,30)+'…' : chTitle) + '</span><span class="material-symbols-outlined text-[20px] ml-1">arrow_forward</span>';
+  }
+  // Chapter stats
+  const visited = getVisitedChapters();
+  const completedEl = document.getElementById('completed-chapters');
+  if (completedEl) completedEl.textContent = visited.length + '/' + SYLLABUS_DATA.length;
 }
 
 function getDuration(c) { return ({1:'120 min',2:'45 min',3:'375 min',4:'195 min',5:'180 min',6:'225 min',7:'30 min'})[c]||''; }
@@ -1096,5 +1146,6 @@ window.showQuickPractice = showQuickPractice;
 window.toggleBilingualPdf = toggleBilingualPdf;
 window.renderFullExam = renderFullExam; window.submitFullExam = submitFullExam; window.retryFullExam = retryFullExam;
 window.onExamChange = onExamChange; window.toggleExamFlag = toggleExamFlag;
+window.resumeLearning = resumeLearning;
 
 document.addEventListener('DOMContentLoaded', init);
