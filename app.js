@@ -114,6 +114,7 @@ function handleRoute() {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('border-secondary', 'text-secondary'));
   document.querySelectorAll('.fab-quiz-btn').forEach(b => b.classList.add('hidden'));
+  window.scrollTo(0,0);
 
   if (hash === 'home') {
     document.getElementById('page-home').classList.add('active');
