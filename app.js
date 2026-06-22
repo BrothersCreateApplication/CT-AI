@@ -108,7 +108,13 @@ function handleRoute() {
     AppState.currentPage = 'quiz'; AppState.currentChapter = parseInt(qm[1]);
     renderQuiz(AppState.currentChapter); return;
   }
-  if (hash === 'full-exam' || hash === 'practice') {
+  if (hash === 'full-exam') {
+    document.getElementById('page-full-exam').classList.add('active');
+    document.querySelector('.nav-link[href="#full-exam"]')?.classList.add('border-secondary', 'text-secondary');
+    AppState.currentPage = 'full-exam'; AppState.currentChapter = null;
+    renderFullExam(); return;
+  }
+  if (hash === 'practice') {
     window.location.hash = 'home';
     setTimeout(showQuickPractice, 100);
     return;
@@ -131,6 +137,17 @@ function buildSidebar() {
     </a>`
   ).join('');
 
+  // Add Full Exam link after chapters
+  const sidebarNav = document.getElementById('chapter-list');
+  sidebarNav.insertAdjacentHTML('beforeend',
+    `<div class="border-t border-outline-variant my-2 pt-2">
+      <a href="#full-exam" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant text-sm font-medium no-underline border-l-[3px] border-transparent" data-chapter="full">
+        <span class="material-symbols-outlined text-secondary" style="font-size:20px;">assignment</span>
+        <span class="font-bold text-secondary">📋 Full Practice Exam</span>
+      </a>
+    </div>`
+  );
+
   document.getElementById('sidebar-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('open');
   document.querySelectorAll('.sidebar-link').forEach(a => a.addEventListener('click', () => {
     if (window.innerWidth < 768) document.getElementById('sidebar')?.classList.remove('open');
@@ -145,6 +162,10 @@ function updateSidebar(hash) {
   if (hash.startsWith('chapter-') || hash.startsWith('quiz-')) {
     const ch = hash.split('-')[1];
     const link = document.querySelector(`.sidebar-link[data-chapter="${ch}"]`);
+    if (link) link.classList.add('bg-secondary-container', 'text-on-secondary-container', 'font-bold', 'border-secondary');
+  }
+  if (hash === 'full-exam') {
+    const link = document.querySelector('.sidebar-link[data-chapter="full"]');
     if (link) link.classList.add('bg-secondary-container', 'text-on-secondary-container', 'font-bold', 'border-secondary');
   }
 }
@@ -173,6 +194,12 @@ function renderHomePage() {
 
   document.getElementById('total-questions-count').textContent = QUESTIONS_DATA.length;
   document.getElementById('total-chapters').textContent = SYLLABUS_DATA.length;
+  // Exam attempts
+  const examHistory = getExamHistory();
+  const examAttEl = document.getElementById('exam-attempts-count');
+  if (examAttEl) examAttEl.textContent = examHistory.length;
+  const fullExamCountEl = document.getElementById('full-exam-count');
+  if (fullExamCountEl) fullExamCountEl.textContent = QUESTIONS_DATA.length;
 }
 
 function getDuration(c) { return ({1:'120 min',2:'45 min',3:'375 min',4:'195 min',5:'180 min',6:'225 min',7:'30 min'})[c]||''; }
@@ -210,7 +237,7 @@ function renderChapter(n) {
     + '<h3 class="font-semibold mb-4">📖 Study Content</h3>'
     + '<p class="text-sm text-on-surface-variant mb-5">Open the syllabus PDF to read with original formatting, images, and tables.</p>'
     + '<div class="flex justify-center gap-4 flex-wrap">'
-    + '<button class="btn bg-secondary text-on-secondary px-6 py-3 rounded-lg font-bold scale-98-active" onclick="window.open(\'ISTQB-_CTAI_Syllabus_v2.0_Release.pdf#page=' + (pageMap[n] || 13) + '\',\'_blank\')">📘 Học với English</button>'
+    + '<button class="btn bg-secondary text-on-secondary px-6 py-3 rounded-lg font-bold scale-98-active" onclick="window.open(\'/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf#page=' + (pageMap[n] || 13) + '\',\'_blank\')">📘 Học với English</button>'
     + '<button class="btn border-2 border-secondary text-secondary px-6 py-3 rounded-lg font-bold hover:bg-secondary hover:text-on-secondary transition-all scale-98-active" onclick="toggleBilingualPdf(' + n + ')">📖 Học với Song ngữ</button>'
     + '</div></div>';
 
@@ -526,6 +553,355 @@ function retryQuiz() {
   }
 }
 
+// ===== FULL EXAM =====
+function renderFullExam() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  const allQuestions = QUESTIONS_DATA;
+
+  if (!allQuestions.length) {
+    document.getElementById('exam-questions-area').innerHTML = '<p class="text-on-surface-variant">No questions available.</p>';
+    document.getElementById('exam-sidebar').innerHTML = '';
+    return;
+  }
+
+  quizState = { chapterNum: 'full', questions: allQuestions, userAnswers: {}, submitted: false, score: null, flagged: new Set() };
+
+  // Sidebar
+  var sideBar = document.getElementById('exam-sidebar');
+  if (sideBar) sideBar.style.display = '';
+
+  document.getElementById('exam-sidebar').innerHTML = `
+    <div class="sticky top-24 bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
+      <div class="text-center mb-4">
+        <p class="text-caption font-caption text-on-surface-variant tracking-wider uppercase">Time Remaining</p>
+        <p class="text-[32px] font-bold text-secondary font-display" id="exam-timer">90:00</p>
+        <div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden mt-2">
+          <div class="h-full bg-secondary rounded-full" id="exam-timer-bar" style="width:100%"></div>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-semibold">Question Navigator</span>
+        <span class="text-xs text-on-surface-variant" id="exam-answered-count">0/${allQuestions.length}</span>
+      </div>
+      <div class="grid grid-cols-5 gap-1.5" id="exam-nav-grid"></div>
+      <div class="flex justify-center gap-3 text-xs text-on-surface-variant mt-3">
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-secondary-container rounded-sm"></span> Answered</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-error rounded-sm"></span> Flagged</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-surface-container-highest rounded-sm"></span> Unseen</span>
+      </div>
+      <button class="btn w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold mt-4 scale-98-active" id="btn-exam-submit" onclick="submitFullExam()">Submit Exam</button>
+      <p class="text-caption font-caption text-on-surface-variant text-center mt-2">All 7 chapters · ${allQuestions.length} questions</p>
+    </div>
+  `;
+
+  // Questions header + chapter breakdown
+  const chCounts = {};
+  allQuestions.forEach(q => { chCounts[q.chapter] = (chCounts[q.chapter] || 0) + 1; });
+  const chLabels = Object.keys(chCounts).sort().map(ch =>
+    `<span class="text-xs px-2 py-0.5 bg-surface-container rounded-full">Ch ${ch}: ${chCounts[ch]}</span>`
+  ).join('');
+
+  let html = `<div class="mb-4">
+    <h1 class="font-display text-headline-lg text-primary">📋 Full Practice Exam</h1>
+    <p class="text-on-surface-variant text-body-md">${allQuestions.length} questions across all chapters · 90 minutes · Passing score: 65%</p>
+    <div class="flex flex-wrap gap-1.5 mt-2">${chLabels}</div>
+  </div>
+  ${renderExamHistory()}`;
+
+  allQuestions.forEach((q, idx) => {
+    const qid = `exam-q${q.id}`;
+    const inputType = q.selectType === 'multiple' ? 'checkbox' : 'radio';
+
+    html += `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 mb-4" id="exam-card-${qid}">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-sm font-semibold text-secondary">Q${idx+1} (Ch.${q.chapter}) · ${q.lo || ''}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-caption font-caption text-on-surface-variant px-2 py-0.5 bg-surface-container rounded-full">${q.points} pt</span>
+          <button class="text-on-surface-variant hover:text-secondary transition-all bg-transparent border-none cursor-pointer p-0.5" onclick="toggleExamFlag(${q.id})" title="Flag for review">
+            <span class="material-symbols-outlined text-[18px]" id="exam-flag-${qid}">flag</span>
+          </button>
+        </div>
+      </div>
+      <div class="text-sm mb-3 leading-relaxed" style="white-space:pre-wrap">${q.text}</div>
+      ${q.selectType === 'multiple' ? `<div class="text-xs text-on-surface-variant italic mb-2">Select ${q.selectCount} answers</div>` : ''}
+      <div class="space-y-2">`;
+
+    q.choices.forEach(c => {
+      const inputName = inputType === 'checkbox' ? `exam-q${q.id}-${c.key}` : `exam-q${q.id}`;
+      html += `<label class="option-card flex items-start gap-3 p-3 border ${inputType==='checkbox'?'':'has-[:checked]:border-2 has-[:checked]:border-secondary has-[:checked]:bg-secondary/5'} border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-all text-sm" id="exam-label-${qid}-${c.key}">
+        <input type="${inputType}" name="${inputName}" value="${c.key}" data-qid="${q.id}" data-exam="1" class="peer mt-0.5 accent-secondary" onchange="onExamChange()" style="accent-color:#0058bb">
+        <span class="font-semibold text-on-surface-variant shrink-0 w-4">${c.key})</span>
+        <span>${c.text}</span>
+      </label>`;
+    });
+
+    html += `</div><div class="mt-3 hidden space-y-1 text-sm text-on-surface-variant" id="exam-rationale-${qid}"></div></div>`;
+  });
+
+  document.getElementById('exam-questions-area').innerHTML = html;
+
+  // Init nav grid
+  renderExamNavGrid();
+  startExamTimer();
+}
+
+function renderExamNavGrid() {
+  const grid = document.getElementById('exam-nav-grid');
+  if (!grid) return;
+  const qs = quizState.questions;
+  grid.innerHTML = qs.map((q, i) =>
+    `<button class="question-nav-btn w-8 h-8 rounded text-xs font-medium bg-surface-container-highest text-on-surface-variant border-none" id="exam-nav-${q.id}" data-idx="${i}" onclick="document.getElementById('exam-card-exam-q${q.id}')?.scrollIntoView({behavior:'smooth'})">${i+1}</button>`
+  ).join('');
+}
+
+function toggleExamFlag(qId) {
+  if (quizState.flagged.has(qId)) quizState.flagged.delete(qId);
+  else quizState.flagged.add(qId);
+  const el = document.getElementById(`exam-flag-exam-q${qId}`);
+  if (el) {
+    el.style.fontVariationSettings = quizState.flagged.has(qId) ? "'FILL'1" : "'FILL'0";
+    el.style.color = quizState.flagged.has(qId) ? '#ba1a1a' : '';
+  }
+  const nav = document.getElementById(`exam-nav-${qId}`);
+  if (nav) {
+    if (quizState.flagged.has(qId)) {
+      nav.classList.add('bg-error', 'text-white');
+      nav.classList.remove('bg-surface-container-highest', 'bg-secondary-container');
+    } else {
+      nav.classList.remove('bg-error', 'text-white');
+      nav.classList.add('bg-surface-container-highest');
+    }
+  }
+}
+
+function onExamChange() {
+  if (quizState.submitted) return;
+  let answered = 0;
+  quizState.questions.forEach(q => {
+    const checked = document.querySelectorAll(`input[data-qid="${q.id}"][data-exam="1"]:checked`).length;
+    if (checked > 0) {
+      answered++;
+      const nav = document.getElementById(`exam-nav-${q.id}`);
+      if (nav && !quizState.flagged.has(q.id)) {
+        nav.classList.remove('bg-surface-container-highest');
+        nav.classList.add('bg-secondary-container', 'text-on-secondary-container');
+      }
+    }
+  });
+  const countEl = document.getElementById('exam-answered-count');
+  if (countEl) countEl.textContent = `${answered}/${quizState.questions.length}`;
+}
+
+let examTimerInterval = null;
+function startExamTimer() {
+  if (examTimerInterval) clearInterval(examTimerInterval);
+  let secs = 5400; // 90 minutes
+  examTimerInterval = setInterval(() => {
+    secs--;
+    const m = Math.floor(secs/60), s = secs%60;
+    const timer = document.getElementById('exam-timer');
+    if (timer) {
+      timer.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      if (secs <= 300) { timer.className = 'text-[32px] font-bold text-error font-display'; }
+    }
+    const bar = document.getElementById('exam-timer-bar');
+    if (bar) bar.style.width = `${(secs/5400)*100}%`;
+    if (secs <= 300 && bar) bar.className = 'h-full bg-error rounded-full';
+    if (secs <= 0) {
+      clearInterval(examTimerInterval);
+      examTimerInterval = null;
+      alert('⏰ Time is up! Submitting your exam...');
+      submitFullExam();
+    }
+  }, 1000);
+}
+
+function submitFullExam() {
+  if (quizState.submitted) return;
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+
+  const userAns = {};
+  let allAnswered = true;
+  quizState.questions.forEach(q => {
+    const keys = Array.from(document.querySelectorAll(`input[data-qid="${q.id}"][data-exam="1"]:checked`)).map(i=>i.value);
+    userAns[q.id] = keys;
+    if (!keys.length) allAnswered = false;
+  });
+  if (!allAnswered && !confirm('⚠️ You have not answered all questions. Submit anyway?')) return;
+
+  quizState.submitted = true;
+  document.getElementById('btn-exam-submit')?.remove();
+
+  let correct = 0, totalPts = 0, earned = 0;
+  const chapterStats = {};
+
+  quizState.questions.forEach(q => {
+    const ans = ANSWERS_DATA[q.id];
+    if (!ans) return;
+    totalPts += q.points;
+    const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
+    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    const isCorrect = u.join(',') === c.join(',');
+    if (isCorrect) { correct++; earned += q.points; }
+
+    // Per-chapter stats
+    if (!chapterStats[q.chapter]) chapterStats[q.chapter] = { correct: 0, total: 0, points: 0, earned: 0 };
+    chapterStats[q.chapter].total++;
+    chapterStats[q.chapter].points += q.points;
+    if (isCorrect) {
+      chapterStats[q.chapter].correct++;
+      chapterStats[q.chapter].earned += q.points;
+    }
+
+    const qid = `exam-q${q.id}`;
+    const card = document.getElementById(`exam-card-${qid}`);
+    if (!card) return;
+    card.className = `rounded-xl p-5 mb-4 border-2 ${isCorrect ? 'border-success bg-success-container' : 'border-error bg-error-container'}`;
+
+    q.choices.forEach(choice => {
+      const label = document.getElementById(`exam-label-${qid}-${choice.key}`);
+      if (!label) return;
+      label.style.cursor = 'default';
+      const input = label.querySelector('input');
+      if (input) input.disabled = true;
+
+      const isUser = u.includes(choice.key);
+      const isRight = c.includes(choice.key);
+      const icon = document.createElement('span');
+      icon.className = 'ml-auto text-sm';
+      if (isRight && isUser) { icon.textContent = '✅'; label.style.borderColor = '#2e7d32'; label.style.background = '#e8f5e9'; }
+      else if (isRight && !isUser) { icon.textContent = '✅'; label.style.borderColor = '#2e7d32'; }
+      else if (!isRight && isUser) { icon.textContent = '❌'; label.style.borderColor = '#ba1a1a'; label.style.background = '#ffebee'; }
+      const existing = label.querySelector('.result-icon');
+      if (existing) existing.remove();
+      label.appendChild(icon);
+    });
+
+    showExamRationale(q, ans, u, c);
+  });
+
+  const pct = Math.round((earned/totalPts)*100);
+  const pass = pct >= 65;
+
+  // Save exam history
+  const wrongIds = quizState.questions.filter(q => {
+    const ans = ANSWERS_DATA[q.id];
+    if (!ans) return false;
+    const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
+    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    return u.join(',') !== c.join(',');
+  }).map(q => q.id);
+  saveExamHistory({ correct, total: quizState.questions.length, pct, wrong: wrongIds, date: new Date().toISOString() });
+  const historyHtml = renderExamHistory();
+
+  // Results summary
+  const ringCirc = 2*Math.PI*38;
+  const offset = ringCirc - (pct/100)*ringCirc;
+
+  // Build chapter breakdown bars
+  const chBars = Object.keys(chapterStats).sort().map(ch => {
+    const s = chapterStats[ch];
+    const cPct = s.total > 0 ? Math.round((s.correct/s.total)*100) : 0;
+    const chTitle = SYLLABUS_DATA.find(d => d.chapter === parseInt(ch))?.title || `Chapter ${ch}`;
+    return `<div class="flex items-center gap-3">
+      <span class="text-xs w-8 shrink-0 font-semibold">Ch ${ch}</span>
+      <div class="flex-1 h-2.5 bg-surface-container-high rounded-full overflow-hidden">
+        <div class="h-full rounded-full transition-all" style="width:${cPct}%;background:${cPct >= 65 ? '#2e7d32' : '#ba1a1a'}"></div>
+      </div>
+      <span class="text-xs font-medium w-16 text-right text-on-surface-variant">${s.correct}/${s.total}</span>
+    </div>`;
+  }).join('');
+
+  const summary = `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
+    <div class="flex flex-col md:flex-row gap-6 items-center">
+      <div class="text-center shrink-0">
+        <svg class="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e8ea" stroke-width="8"/>
+          <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${ringCirc}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
+        </svg>
+        <div class="text-2xl font-bold font-display -mt-16">${pct}%</div>
+        <span class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold ${pass ? 'bg-success-container text-success' : 'bg-error-container text-error'}">${pass ? 'PASS' : 'FAIL'}</span>
+        <p class="text-caption font-caption text-on-surface-variant mt-1">Required: 65%</p>
+      </div>
+      <div class="flex-1">
+        <h2 class="font-display text-headline-lg">${pass ? '🎉 Congratulations!' : '📖 Keep studying!'}</h2>
+        <p class="text-on-surface-variant">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)</p>
+        <div class="mt-3 space-y-1.5">${chBars}</div>
+      </div>
+    </div>
+    <div class="flex justify-center gap-3 mt-4">
+      <button class="btn bg-secondary text-on-secondary px-5 py-2 rounded-lg font-bold scale-98-active" onclick="retryFullExam()">🔄 Retry Exam</button>
+      <button class="btn border-2 border-outline-variant text-on-surface px-5 py-2 rounded-lg font-bold scale-98-active" onclick="navigate('home')">🏠 Back to Dashboard</button>
+    </div>
+  </div>`;
+
+  document.getElementById('exam-questions-area').insertAdjacentHTML('afterbegin', summary);
+  if (historyHtml) {
+    document.getElementById('exam-questions-area').insertAdjacentHTML('beforeend', historyHtml);
+  }
+  var es = document.getElementById('exam-sidebar');
+  if (es) es.style.display = 'none';
+}
+
+function showExamRationale(q, ans, userK, correctK) {
+  const qid = `exam-q${q.id}`;
+  const div = document.getElementById(`exam-rationale-${qid}`);
+  if (!div) return;
+  let html = '<div class="p-3 bg-surface-container rounded-lg space-y-1">';
+  if (ans.rationale && Object.keys(ans.rationale).length > 0) {
+    Object.entries(ans.rationale).forEach(function(e) {
+      var k = e[0], t = e[1];
+      var cls = correctK.includes(k) ? 'text-success font-medium' : (userK.includes(k) ? 'text-error font-medium' : '');
+      html += '<div class="' + cls + '"><strong>' + k + ')</strong> ' + t + '</div>';
+    });
+  } else {
+    html += '<p class="text-on-surface-variant italic text-xs">(No detailed explanation from official answer key)</p>';
+  }
+  html += '</div>';
+  div.innerHTML = html;
+  div.classList.remove('hidden');
+}
+
+function retryFullExam() {
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+  window.location.hash = 'home';
+  setTimeout(function() { window.location.hash = 'full-exam'; }, 50);
+}
+
+// ===== EXAM HISTORY =====
+function getExamHistory() {
+  try {
+    const data = JSON.parse(localStorage.getItem('ctai_exam_history') || '[]');
+    return data;
+  } catch(e) { return []; }
+}
+
+function saveExamHistory(entry) {
+  try {
+    const data = getExamHistory();
+    data.push(entry);
+    if (data.length > 10) data = data.slice(-10);
+    localStorage.setItem('ctai_exam_history', JSON.stringify(data));
+  } catch(e) { console.warn('Could not save exam history:', e); }
+}
+
+function renderExamHistory() {
+  const history = getExamHistory();
+  if (!history.length) return '';
+  let html = '<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 mb-4"><h3 class="text-sm font-semibold mb-2">📋 Exam Attempt History</h3><div class="space-y-1.5">';
+  history.slice().reverse().forEach(h => {
+    const d = new Date(h.date);
+    const ds = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const ws = h.wrong.length ? '❌ Q' + h.wrong.join(', Q') : '🎯 All correct!';
+    html += '<div class="flex items-center justify-between text-xs py-1.5 px-2 bg-surface-container rounded">'
+      + '<span class="text-on-surface-variant">' + ds + '</span>'
+      + '<span class="font-medium ' + (h.pct >= 65 ? 'text-success' : 'text-error') + '">' + h.correct + '/' + h.total + ' (' + h.pct + '%)</span>'
+      + '<span class="text-on-surface-variant">' + ws + '</span></div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
 // ===== QUIZ HISTORY (localStorage) =====
 function getQuizHistory(chapterNum) {
   try {
@@ -703,5 +1079,7 @@ window.openAiPopup = openAiPopup; window.closeAiPopup = closeAiPopup; window.sen
 window.explainSelection = explainSelection;
 window.showQuickPractice = showQuickPractice;
 window.toggleBilingualPdf = toggleBilingualPdf;
+window.renderFullExam = renderFullExam; window.submitFullExam = submitFullExam; window.retryFullExam = retryFullExam;
+window.onExamChange = onExamChange; window.toggleExamFlag = toggleExamFlag;
 
 document.addEventListener('DOMContentLoaded', init);

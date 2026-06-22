@@ -82,7 +82,7 @@ code { font-family: 'JetBrains Mono', monospace; }
       <nav class="hidden md:flex items-center gap-lg ml-4">
         <a href="#home" class="nav-link text-label-md font-label text-on-surface-variant hover:text-secondary no-underline pb-1 border-b-2 border-transparent transition-all" onclick="setActiveNav(this)">Dashboard</a>
         <a href="#chapter-1" class="nav-link text-label-md font-label text-on-surface-variant hover:text-secondary no-underline pb-1 border-b-2 border-transparent transition-all" onclick="setActiveNav(this)">Course Content</a>
-        <a href="#practice" class="nav-link text-label-md font-label text-on-surface-variant hover:text-secondary no-underline pb-1 border-b-2 border-transparent transition-all" onclick="setActiveNav(this)">Practice Exams</a>
+        <a href="#full-exam" class="nav-link text-label-md font-label text-on-surface-variant hover:text-secondary no-underline pb-1 border-b-2 border-transparent transition-all" onclick="setActiveNav(this)">Full Exam</a>
       </nav>
     </div>
     <div class="flex items-center gap-3">
@@ -129,6 +129,7 @@ code { font-family: 'JetBrains Mono', monospace; }
         <div class="flex items-center gap-2 px-4 py-2 bg-surface-container rounded-xl text-sm font-medium text-on-surface-variant">📚 <span id="total-chapters">7</span> Chapters</div>
         <div class="flex items-center gap-2 px-4 py-2 bg-surface-container rounded-xl text-sm font-medium text-on-surface-variant">⏱ 19.5 Hours</div>
         <div class="flex items-center gap-2 px-4 py-2 bg-surface-container rounded-xl text-sm font-medium text-on-surface-variant">❓ <span id="total-questions-count">0</span> Questions</div>
+        <div class="flex items-center gap-2 px-4 py-2 bg-surface-container rounded-xl text-sm font-medium text-on-surface-variant">📋 <span id="exam-attempts-count">0</span> Exam Attempts</div>
       </div>
 
       <div class="bento-grid">
@@ -181,6 +182,25 @@ code { font-family: 'JetBrains Mono', monospace; }
         <div class="col-span-12 flex justify-between items-end mt-2">
           <h2 class="font-display text-headline-lg text-primary" style="font-size:24px;">Course Modules</h2>
           <button class="text-secondary text-label-md font-label hover:underline" onclick="navigate('chapter-1')">View Syllabus</button>
+        </div>
+
+        <!-- Full Practice Exam Card -->
+        <div class="col-span-12 bg-gradient-to-br from-primary to-[#0a2540] text-on-primary rounded-xl p-6 relative overflow-hidden group cursor-pointer" onclick="navigate('full-exam')">
+          <div class="absolute -right-8 -top-8 w-48 h-48 bg-secondary-fixed/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -left-4 -bottom-4 w-32 h-32 bg-secondary-fixed-dim/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div class="w-16 h-16 bg-secondary-fixed/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/10">
+              <span class="material-symbols-outlined text-[36px] text-secondary-fixed">assignment</span>
+            </div>
+            <div class="flex-1">
+              <span class="inline-block px-2 py-0.5 bg-secondary-fixed/20 text-secondary-fixed text-caption font-caption rounded mb-2">📋 FULL EXAM</span>
+              <h2 class="font-display text-headline-lg text-on-primary mb-1">Full Practice Exam</h2>
+              <p class="text-on-primary/70 text-body-md max-w-xl">Test your knowledge across all <strong>7 chapters</strong> with <strong><span id="full-exam-count">43</span> questions</strong> — just like the real ISTQB CT-AI certification exam. 90-minute timed practice with detailed rationales.</p>
+            </div>
+            <button class="btn shrink-0 bg-secondary-fixed text-on-secondary-fixed px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:gap-3 transition-all scale-98-active whitespace-nowrap shadow-lg" onclick="event.stopPropagation();navigate('full-exam')">
+              Start Exam <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+            </button>
+          </div>
         </div>
 
         <!-- Chapter Cards -->
