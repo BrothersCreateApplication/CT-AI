@@ -148,9 +148,14 @@ var pageSize = {1:7, 2:5, 3:12, 4:8, 5:8, 6:9, 7:2};
 function loadPages() {
   var pdfPage = startPage + currentPage - 1;
   var t = Date.now();
-  document.getElementById('en-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + chapter + '&p=' + currentPage + '&t=' + t + '#page=' + pdfPage;
-  document.getElementById('vn-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?ch=' + chapter + '&p=' + currentPage + '&t=' + t + '#page=' + pdfPage;
-  document.getElementById('page-info').textContent = 'Ch' + chapter + ' · Page ' + currentPage + '/' + (pageSize[chapter] || 15) + '  (' + pdfPage + ')';
+  // Clear both iframes first to force fresh load
+  document.getElementById('en-frame').src = 'about:blank';
+  document.getElementById('vn-frame').src = 'about:blank';
+  document.getElementById('page-info').textContent = 'Ch' + chapter + ' · Page ' + currentPage + '/' + (pageSize[chapter] || 15) + '  (PDF ' + pdfPage + ')';
+  setTimeout(function() {
+    document.getElementById('en-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + chapter + '&p=' + currentPage + '&t=' + t + '#page=' + pdfPage;
+    document.getElementById('vn-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?ch=' + chapter + '&p=' + currentPage + '&t=' + (t+1) + '#page=' + pdfPage;
+  }, 100);
 }
 
 function prevPage() {
