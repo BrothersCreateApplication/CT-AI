@@ -784,9 +784,9 @@ a:hover { text-decoration: underline; }
   .sidebar-toggle { display: block; }
   .nav-links { display: none; }
   .search-box { display: none; }
-  .sidebar { position: fixed; left: 0; top: 64px; width: 280px; transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.15); }
-  .main-content { padding: 14px; margin-bottom: 64px; overflow-x: hidden; }
+  .sidebar { display: flex !important; position: fixed; left: 0; top: 64px; width: 280px; transform: translateX(-100%); }
+  .sidebar.open { display: flex !important; transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.15); }
+  .main-content { padding: 14px; margin-bottom: 64px; }
   .bento-grid { gap: 14px; }
   .chapters-grid { grid-template-columns: 1fr; }
   .mobile-bottom-nav { display: flex; }
