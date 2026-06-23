@@ -571,7 +571,7 @@ function renderChapter(n) {
 
   var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
   var chImgs = [
-    'https://images.unsplash.com/photo-1531746790095-e5cb1781c3fe?w=800&h=300&fit=crop',    // creative AI brain art
+    'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=300&fit=crop',    // AI brain
     'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&h=300&fit=crop',    // colorful tech
     'https://images.unsplash.com/photo-1527474305487-b87b222841cc?w=800&h=300&fit=crop',    // abstract technology
     'https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?w=800&h=300&fit=crop',    // laptop coding
