@@ -884,18 +884,14 @@ function submitQuiz() {
         <div class="relative inline-flex items-center justify-center w-24 h-24">
           <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e8ea" stroke-width="8"/>
-            <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#0058bb" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
           </svg>
           <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold font-display">${pct}%</span>
         </div>
-        <div class="flex items-center justify-center gap-2 mt-3">
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold" style="${pass ? 'background:#e8f5e9;color:#2e7d32' : 'background:#ffebee;color:#ba1a1a'}">${pass ? '✓ PASS' : '✗ FAIL'}</span>
-          <span class="text-xs text-on-surface-variant">${correct}/${quizState.questions.length} correct</span>
-        </div>
+        <div class="mt-2 text-xs text-on-surface-variant">${correct}/${quizState.questions.length} correct</div>
       </div>
       <div class="flex-1">
-        <h2 class="font-display text-headline-lg">${pass ? '🎉 Great job!' : '📖 Keep studying!'}</h2>
-        <p class="text-on-surface-variant">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)</p>
+        <p class="text-on-surface-variant text-base">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)</p>
         <div class="mt-2 text-sm">${wrongIds.length > 0 ? '<span class="text-error font-medium">❌ Wrong:</span> Q' + wrongIds.join(', Q') : '<span class="text-success font-medium">🎯 All correct!</span>'}</div>
       </div>
     </div>
