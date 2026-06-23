@@ -2,6 +2,23 @@
 // Design: Academic, Precise, Future-Proof
 
 const AppState = { currentPage: 'home', currentChapter: null };
+const COURSES = {
+  'ct-ai': {
+    id:'ct-ai', title:'CT-AI Foundation', short:'CT-AI', subtitle:'Certified Tester AI Testing',
+    desc:'Master AI testing with ISTQB\'s official syllabus. Covers ML testing, data quality, model validation, and AI system testing.',
+    icon:'🤖', color:'#0058bb', gradient:'from-blue-600 to-indigo-700', chapters:7, questions:43,
+    img:'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=400&fit=crop&auto=format'
+  },
+  'ct-genai': {
+    id:'ct-genai', title:'CT-GenAI Foundation', short:'GenAI', subtitle:'Testing with Generative AI',
+    desc:'Learn to test GenAI systems, LLMs, prompt engineering, and AI-powered applications.',
+    icon:'⚡', color:'#7c3aed', gradient:'from-violet-600 to-purple-700', chapters:6, questions:40,
+    img:'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&h=400&fit=crop&auto=format',
+    coming:true
+  }
+};
+function getCurrentCourse() { try { return localStorage.getItem('ctai_course'); } catch(e) { return null; } }
+function setCurrentCourse(id) { if (COURSES[id]) localStorage.setItem('ctai_course', id); }
 
 // ===== PROGRESS TRACKING =====
 function trackChapterVisit(chapter) {
@@ -26,6 +43,45 @@ function getStudyProgress() {
   const visited = getVisitedChapters();
   const total = SYLLABUS_DATA.length;
   return { visited: visited.length, total, pct: total > 0 ? Math.round((visited.length / total) * 100) : 0 };
+}
+
+function showCourseSelector() {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('page-course-select').classList.add('active');
+  var grid = document.getElementById('course-list');
+  if (!grid) return;
+  grid.innerHTML = '';
+  var keys = Object.keys(COURSES);
+  keys.forEach(function(id) {
+    var c = COURSES[id];
+    grid.innerHTML += '<div class="relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group bg-white/5 backdrop-blur-sm border ' + (c.coming ? 'border-white/10 opacity-60' : 'border-white/20 hover:border-white/40') + '" onclick="selectCourse(\'' + id + '\')">'
+      + '<div class="relative h-44 md:h-52 overflow-hidden">'
+      + '<img src="' + c.img + '" alt="' + c.title + '" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.display=\'none\'">'
+      + '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>'
+      + '<div class="absolute bottom-4 left-4 right-4">'
+      + '<div class="flex items-center gap-2 mb-1">'
+      + '<span class="text-2xl">' + c.icon + '</span>'
+      + '<h3 class="font-display text-xl font-bold text-white">' + c.title + '</h3>'
+      + '</div>'
+      + '<p class="text-sm text-white/70">' + c.subtitle + '</p>'
+      + '</div>'
+      + (c.coming ? '<div class="absolute top-4 right-4 px-3 py-1.5 bg-black/40 backdrop-blur-sm text-white text-xs font-bold rounded-full border border-white/20">Coming Soon</div>' : '<div class="absolute top-4 right-4 px-3 py-1.5 bg-white/90 text-gray-900 text-xs font-bold rounded-full shadow-lg">Available</div>')
+      + '</div>'
+      + '<div class="p-5">'
+      + '<p class="text-sm text-gray-400 mb-4 leading-relaxed">' + c.desc + '</p>'
+      + '<div class="flex items-center gap-4 text-xs text-gray-500">'
+      + '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span> <span class="text-gray-300 font-medium">' + c.chapters + '</span> chapters</span>'
+      + '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span> <span class="text-gray-300 font-medium">' + c.questions + '</span> questions</span>'
+      + '</div>'
+      + '</div></div>';
+  });
+}
+
+function selectCourse(id) {
+  if (COURSES[id].coming) { alert('This course is coming soon! Stay tuned.'); return; }
+  setCurrentCourse(id);
+  window.location.hash = 'home';
+  location.reload();
 }
 
 function resumeLearning() {
@@ -326,6 +382,7 @@ function handleRoute() {
   window.scrollTo(0,0);
 
   if (hash === 'home') {
+    if (!getCurrentCourse()) { showCourseSelector(); return; }
     document.getElementById('page-home').classList.add('active');
     document.querySelector('.nav-link[href="#home"]')?.classList.add('border-secondary', 'text-secondary');
     AppState.currentPage = 'home'; AppState.currentChapter = null;
@@ -1330,6 +1387,8 @@ function initSearch() {
 
 // ===== INIT =====
 function init() {
+  var footer = document.getElementById('course-footer');
+  if (footer && getCurrentCourse()) footer.style.display = '';
   buildSidebar();
   renderHomePage();
   initSearch();
@@ -1347,5 +1406,7 @@ window.renderFullExam = renderFullExam; window.submitFullExam = submitFullExam; 
 window.onExamChange = onExamChange; window.toggleExamFlag = toggleExamFlag;
 window.resumeLearning = resumeLearning;
 window.resetProgress = resetProgress;
+window.showCourseSelector = showCourseSelector;
+window.selectCourse = selectCourse;
 
 document.addEventListener('DOMContentLoaded', init);
