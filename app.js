@@ -878,25 +878,27 @@ function submitQuiz() {
   const historyHtml = renderQuizHistory(quizState.chapterNum);
 
   // Results summary
-  const summary = `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
-    <div class="flex flex-col md:flex-row gap-6 items-center">
-      <div class="text-center shrink-0">
-        <div class="relative inline-flex items-center justify-center w-24 h-24">
-          <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e8ea" stroke-width="8"/>
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#0058bb" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
-          </svg>
-          <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold font-display">${pct}%</span>
+  const summary = `<div class="rounded-xl mb-6 overflow-hidden border border-outline-variant shadow-sm">
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-5 border-b border-blue-100">
+      <div class="flex flex-col md:flex-row gap-5 items-center">
+        <div class="text-center shrink-0">
+          <div class="relative inline-flex items-center justify-center w-24 h-24">
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#dbeafe" stroke-width="8"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#0058bb" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
+            </svg>
+            <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold font-display text-primary">${pct}%</span>
+          </div>
+          <div class="mt-1.5 text-xs font-medium text-blue-600">${correct}/${quizState.questions.length} correct</div>
         </div>
-        <div class="mt-2 text-xs text-on-surface-variant">${correct}/${quizState.questions.length} correct</div>
-      </div>
-      <div class="flex-1">
-        <p class="text-on-surface-variant text-base">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)</p>
-        <div class="mt-2 text-sm">${wrongIds.length > 0 ? '<span class="text-error font-medium">❌ Wrong:</span> Q' + wrongIds.join(', Q') : '<span class="text-success font-medium">🎯 All correct!</span>'}</div>
+        <div class="flex-1 text-center md:text-left">
+          <div class="text-base text-gray-700">You answered <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} pts)</div>
+          <div class="mt-1.5 text-sm">${wrongIds.length > 0 ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-medium">❌ ' + wrongIds.length + ' wrong: Q' + wrongIds.join(', Q') + '</span>' : '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">🎯 All correct!</span>'}</div>
+        </div>
       </div>
     </div>
-    <div class="flex justify-center gap-3 mt-4">
-      <button class="btn bg-secondary text-on-secondary px-5 py-2 rounded-lg font-bold scale-98-active" onclick="retryQuiz()">🔄 Retry</button>
+    <div class="bg-white px-6 py-3 flex justify-center gap-3">
+      <button class="btn bg-secondary text-on-secondary px-5 py-2 rounded-lg font-bold scale-98-active text-sm" onclick="retryQuiz()">🔄 Retry</button>
     </div>
   </div>`;
 
@@ -1197,30 +1199,37 @@ function submitFullExam() {
     </div>`;
   }).join('');
 
-  const summary = `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
-    <div class="flex flex-col md:flex-row gap-6 items-center">
-      <div class="text-center shrink-0">
-        <div class="relative inline-flex items-center justify-center w-24 h-24">
-          <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e8ea" stroke-width="8"/>
-            <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
-          </svg>
-          <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold font-display">${pct}%</span>
+  const barColor = pass ? '#2e7d32' : '#ba1a1a';
+  const barBg = pass ? '#ecfdf5' : '#fef2f2';
+  const border = pass ? '#bbf7d0' : '#fecaca';
+  const grad = pass ? 'from-green-50 to-emerald-50' : 'from-red-50 to-rose-50';
+  const summary = `<div class="rounded-xl mb-6 overflow-hidden border shadow-sm" style="border-color:${border}">
+    <div class="bg-gradient-to-r ${grad} px-6 py-5" style="border-bottom:1px solid ${border}">
+      <div class="flex flex-col md:flex-row gap-5 items-center">
+        <div class="text-center shrink-0">
+          <div class="relative inline-flex items-center justify-center w-24 h-24">
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="${barColor}" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
+            </svg>
+            <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold font-display" style="color:${barColor}">${pct}%</span>
+          </div>
+          <div class="flex items-center justify-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold" style="background:${barBg};color:${barColor};border:1px solid ${border}">${pass ? '✓ PASS' : '✗ FAIL'}</span>
+            <span class="text-xs" style="color:${barColor}">${correct}/${quizState.questions.length}</span>
+          </div>
+          <div class="mt-1.5 text-xs text-gray-500">Required: 65%</div>
         </div>
-        <div class="flex items-center justify-center gap-2 mt-3">
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold" style="${pass ? 'background:#e8f5e9;color:#2e7d32' : 'background:#ffebee;color:#ba1a1a'}">${pass ? '✓ PASS' : '✗ FAIL'}</span>
-          <span class="text-xs text-on-surface-variant">${correct}/${quizState.questions.length}</span>
+        <div class="flex-1 text-center md:text-left">
+          <h2 class="font-display text-xl font-bold" style="color:${barColor}">${pass ? '🎉 Congratulations!' : '📖 Keep studying!'}</h2>
+          <p class="text-gray-600 text-sm mt-1">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)</p>
+          <div class="mt-3 space-y-1.5">${chBars}</div>
         </div>
-      </div>
-      <div class="flex-1">
-        <h2 class="font-display text-headline-lg">${pass ? '🎉 Congratulations!' : '📖 Keep studying!'}</h2>
-        <p class="text-on-surface-variant">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)${wrongIds.length > 0 ? ' · ❌ Q' + wrongIds.join(', Q') : ' · 🎯 All correct!'}</p>
-        <div class="mt-3 space-y-1.5">${chBars}</div>
       </div>
     </div>
-    <div class="flex justify-center gap-3 mt-4">
-      <button class="btn bg-secondary text-on-secondary px-5 py-2 rounded-lg font-bold scale-98-active" onclick="retryFullExam()">🔄 Retry Exam</button>
-      <button class="btn border-2 border-outline-variant text-on-surface px-5 py-2 rounded-lg font-bold scale-98-active" onclick="navigate('home')">🏠 Back to Dashboard</button>
+    <div class="bg-white px-6 py-3 flex justify-center gap-3">
+      <button class="btn bg-secondary text-on-secondary px-5 py-2 rounded-lg font-bold scale-98-active text-sm" onclick="retryFullExam()">🔄 Retry Exam</button>
+      <button class="btn border-2 border-gray-200 text-gray-600 px-5 py-2 rounded-lg font-bold scale-98-active text-sm hover:bg-gray-50" onclick="navigate('home')">🏠 Dashboard</button>
     </div>
   </div>`;
 
