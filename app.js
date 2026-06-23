@@ -54,13 +54,18 @@ function showCourseSelector() {
   var keys = Object.keys(COURSES);
   keys.forEach(function(id) {
     var c = COURSES[id];
-    var grad = id === 'ct-ai' ? 'from-blue-600 to-indigo-700' : 'from-violet-600 to-purple-700';
     grid.innerHTML += '<div class="relative rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group bg-white/5 backdrop-blur-sm border ' + (c.coming ? 'border-white/10 opacity-60' : 'border-white/20 hover:border-white/40') + '" onclick="selectCourse(\'' + id + '\')">'
-      + '<div class="bg-gradient-to-br ' + grad + ' px-6 py-8 md:py-10 text-center">'
-      + (c.coming ? '<span class="inline-block px-3 py-1 bg-black/30 text-white text-xs font-bold rounded-full border border-white/20">Coming Soon</span>' : '<span class="inline-block px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full">Available</span>')
-      + '<div class="text-5xl md:text-6xl mt-4 mb-3">' + c.icon + '</div>'
-      + '<h3 class="font-display text-2xl md:text-3xl font-bold text-white mb-1">' + c.title + '</h3>'
+      + '<div class="relative overflow-hidden" style="aspect-ratio:4/3">'
+      + '<img src="' + c.img + '" alt="' + c.title + '" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.style.display=\'none\'">'
+      + '<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>'
+      + '<div class="absolute bottom-4 left-5 right-5">'
+      + '<div class="flex items-center gap-3 mb-1">'
+      + '<span class="text-3xl">' + c.icon + '</span>'
+      + '<h3 class="font-display text-2xl md:text-3xl font-bold text-white">' + c.title + '</h3>'
+      + '</div>'
       + '<p class="text-base md:text-lg text-white/70">' + c.subtitle + '</p>'
+      + '</div>'
+      + (c.coming ? '<div class="absolute top-4 right-4 px-3 py-1.5 bg-black/40 backdrop-blur-sm text-white text-xs font-bold rounded-full border border-white/20">Coming Soon</div>' : '<div class="absolute top-4 right-4 px-3 py-1.5 bg-white/90 text-gray-900 text-xs font-bold rounded-full shadow-lg">Available</div>')
       + '</div>'
       + '<div class="p-5 md:p-6">'
       + '<p class="text-sm md:text-base text-slate-300 mb-4 leading-relaxed font-medium">' + c.desc + '</p>'
