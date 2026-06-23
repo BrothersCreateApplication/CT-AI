@@ -500,12 +500,14 @@ function renderHomePage() {
     'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=400&q=80',
     'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=400&q=80'
   ];
+  var chColors = ['#4f46e5','#059669','#2563eb','#0284c7','#7c3aed','#db2777','#0d9488'];
   var chGrid = '<div class="col-span-12"><div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
   SYLLABUS_DATA.forEach(function(ch) {
     const idx = ch.chapter - 1;
     const qs = QUESTIONS_DATA.filter(function(q) { return q.chapter === ch.chapter; }).length;
+    var col = chColors[idx];
     chGrid += '<div class="cursor-pointer group" onclick="navigate(\'chapter-' + ch.chapter + '\')">'
-      + '<div class="rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow transition-all duration-200">'
+      + '<div class="rounded-xl overflow-hidden border border-outline-variant hover:shadow transition-all duration-200">'
       + '<div class="relative" style="aspect-ratio:1">'
       + '<img src="' + chImgs[idx] + '" alt="" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.background=\'linear-gradient(135deg, #1e1b4b, #3730a3)\'">'
       + '<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>'
@@ -513,9 +515,10 @@ function renderHomePage() {
       + '<span>⏱ ' + getDuration(ch.chapter) + '</span>'
       + '<span>❓ ' + qs + '</span>'
       + '</div></div>'
+      + '<div style="background:' + col + ';height:3px"></div>'
       + '<div class="px-2 py-1.5 bg-white h-10 flex flex-col justify-center">'
-      + '<div class="text-[9px] text-on-surface-variant font-semibold leading-tight">Chapter ' + ch.chapter + '</div>'
-      + '<div class="text-[11px] text-primary font-bold leading-tight" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + ch.title + '</div>'
+      + '<div class="text-[10px] font-bold" style="color:' + col + '">Chapter ' + ch.chapter + '</div>'
+      + '<div class="text-[12px] text-gray-800 font-bold leading-tight" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + ch.title + '</div>'
       + '</div></div></div>';
   });
   chGrid += '</div></div>';
