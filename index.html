@@ -85,7 +85,7 @@ code { font-family: 'JetBrains Mono', monospace; }
       <nav class="hidden md:flex items-center gap-lg ml-4">
         <a href="#course-select" class="nav-link text-label-md font-label text-secondary font-bold no-underline pb-1 border-b-2 border-transparent transition-all" onclick="setActiveNav(this)">Courses</a>
         <a href="#dashboard" class="nav-link text-label-md font-label text-on-surface-variant hover:text-secondary no-underline pb-1 border-b-2 border-transparent transition-all" onclick="setActiveNav(this)">Dashboard</a>
-        <a href="#chapter-1" class="nav-link text-label-md font-label text-on-surface-variant hover:text-secondary no-underline pb-1 border-b-2 border-transparent transition-all" onclick="setActiveNav(this)">Course Content</a>
+        <a href="#chapter-1" class="nav-link text-label-md font-label text-on-surface-variant hover:text-secondary no-underline pb-1 border-b-2 border-transparent transition-all" onclick="event.preventDefault();resumeLearning()">Course Content</a>
         <a href="#full-exam" class="nav-link text-label-md font-label text-on-surface-variant hover:text-secondary no-underline pb-1 border-b-2 border-transparent transition-all" onclick="setActiveNav(this)">Full Exam</a>
       </nav>
     </div>
@@ -240,7 +240,7 @@ code { font-family: 'JetBrains Mono', monospace; }
     <span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">dashboard</span>
     <span class="text-[11px] font-medium">Home</span>
   </button>
-  <button class="flex flex-col items-center gap-0.5 text-on-surface-variant bg-transparent border-none cursor-pointer px-3 py-1" onclick="navigate('chapter-1')">
+  <button class="flex flex-col items-center gap-0.5 text-on-surface-variant bg-transparent border-none cursor-pointer px-3 py-1" onclick="resumeLearning()">
     <span class="material-symbols-outlined">menu_book</span>
     <span class="text-[11px] font-medium">Learn</span>
   </button>
