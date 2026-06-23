@@ -87,7 +87,7 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, sans-serif; }
 }
 .pane-label .en { color: #0058bb; margin-right: 4px; }
 .pane-label .vn { color: #2e7d32; margin-right: 4px; }
-.pane iframe {
+.pane embed {
   flex: 1;
   border: none;
   width: 100%;
@@ -127,11 +127,11 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, sans-serif; }
 <div class="panes" id="panes-container">
   <div class="pane">
     <div class="pane-label"><span class="en">📄 English</span> Original Syllabus</div>
-    <iframe id="en-frame" allowfullscreen></iframe>
+    <embed id="en-frame" type="application/pdf">
   </div>
   <div class="pane">
     <div class="pane-label"><span class="vn">📄 Tiếng Việt</span> Bản dịch</div>
-    <iframe id="vn-frame" allowfullscreen></iframe>
+    <embed id="vn-frame" type="application/pdf">
   </div>
 </div>
 <div class="scroll-hint" id="scroll-hint">Scroll to flip pages · ← → keys</div>
@@ -148,14 +148,11 @@ var pageSize = {1:7, 2:5, 3:12, 4:8, 5:8, 6:9, 7:2};
 function loadPages() {
   var pdfPage = startPage + currentPage - 1;
   var t = Date.now();
-  // Clear both iframes first to force fresh load
-  document.getElementById('en-frame').src = 'about:blank';
-  document.getElementById('vn-frame').src = 'about:blank';
+  var base = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + chapter + '&p=' + currentPage;
+  var baseVn = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?ch=' + chapter + '&p=' + currentPage;
+  document.getElementById('en-frame').src = base + '&t=' + t + '#page=' + pdfPage;
+  document.getElementById('vn-frame').src = baseVn + '&t=' + (t+1) + '#page=' + pdfPage;
   document.getElementById('page-info').textContent = 'Ch' + chapter + ' · Page ' + currentPage + '/' + (pageSize[chapter] || 15) + '  (PDF ' + pdfPage + ')';
-  setTimeout(function() {
-    document.getElementById('en-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + chapter + '&p=' + currentPage + '&t=' + t + '#page=' + pdfPage;
-    document.getElementById('vn-frame').src = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?ch=' + chapter + '&p=' + currentPage + '&t=' + (t+1) + '#page=' + pdfPage;
-  }, 100);
 }
 
 function prevPage() {
