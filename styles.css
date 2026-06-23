@@ -806,13 +806,16 @@ a:hover { text-decoration: underline; }
   .bento-grid > div:last-of-type button { width: 100%; }
 
   /* Chapter page */
-  #chapter-content h1 { font-size: 20px !important; }
+  #chapter-content h1, .chapter-head h1 { font-size: 18px !important; line-height: 26px !important; }
   #chapter-content .lo-box { padding: 12px; }
+  #chapter-content .btn { width: 100%; justify-content: center; }
 
-  /* Quiz */
+  /* Quiz - make submit accessible */
   #full-exam-content, #quiz-content { flex-direction: column; }
   .option-card { padding: 10px !important; font-size: 13px !important; }
-  #quiz-sidebar, #exam-sidebar { width: 100% !important; }
+  #quiz-sidebar, #exam-sidebar { width: 100% !important; position: static !important; margin-top: 16px; }
+  #quiz-sidebar > div, #exam-sidebar > div { position: static !important; }
+  #quiz-questions-area, #exam-questions-area { padding-bottom: 80px; }
 
   /* Nav header */
   .logo { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
