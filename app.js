@@ -408,6 +408,7 @@ function handleRoute() {
     trackChapterVisit(parseInt(qm[1]));
     renderQuiz(AppState.currentChapter); return;
   }
+  if (hash === 'course-select') { showCourseSelector(); return; }
   if (hash === 'full-exam') {
     document.getElementById('page-full-exam').classList.add('active');
     document.querySelector('.nav-link[href="#full-exam"]')?.classList.add('border-secondary', 'text-secondary');
