@@ -325,6 +325,7 @@ function handleRoute() {
   if (cm) {
     document.getElementById('page-chapter').classList.add('active');
     document.querySelector('.nav-link[href="#chapter-1"]')?.classList.add('border-secondary', 'text-secondary');
+    updateSidebar(hash);
     AppState.currentPage = 'chapter'; AppState.currentChapter = parseInt(cm[1]);
     trackChapterVisit(parseInt(cm[1]));
     renderChapter(AppState.currentChapter);
@@ -486,12 +487,21 @@ function renderChapter(n) {
   const qs = QUESTIONS_DATA.filter(q => q.chapter === n).length;
   const pageMap = {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63};
 
-  let html = '<div class="mb-5 pb-4 border-b border-outline-variant">'
-    + '<span class="text-caption font-caption text-secondary font-semibold tracking-wider">CHAPTER ' + n + ' · ' + getDuration(n) + '</span>'
-    + '<h1 class="font-display text-2xl md:text-3xl font-bold mt-1">' + ch.title + '</h1>'
-    + '<div class="flex gap-4 mt-2 text-sm text-on-surface-variant">'
-    + '<span>📄 ' + (pageMap[n] ? 'From page ' + pageMap[n] : '') + '</span>'
-    + '<span>❓ ' + qs + ' quiz questions</span></div></div>';
+  var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
+  var iconColors = ['from-red-500 to-rose-600','from-emerald-500 to-teal-600','from-orange-500 to-red-500','from-sky-500 to-blue-600','from-violet-500 to-purple-600','from-pink-500 to-rose-500','from-cyan-500 to-teal-500'];
+  let html = '<div class="relative overflow-hidden rounded-xl bg-gradient-to-br ' + iconColors[n-1] + ' p-5 md:p-7 mb-6 text-white">'
+    + '<div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-8 -mt-8 blur-2xl"></div>'
+    + '<div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-6 -mb-6 blur-xl"></div>'
+    + '<div class="relative z-10">'
+    + '<div class="flex items-center gap-3 mb-2">'
+    + '<span class="text-3xl">' + icons[n-1] + '</span>'
+    + '<span class="text-xs font-semibold uppercase tracking-widest text-white/70">Chapter ' + n + ' · ' + getDuration(n) + '</span>'
+    + '</div>'
+    + '<h1 class="font-display text-2xl md:text-3xl font-bold">' + ch.title + '</h1>'
+    + '<div class="flex gap-4 mt-2 text-sm text-white/70">'
+    + '<span>📄 Page ' + (pageMap[n] || '?') + '</span>'
+    + '<span>❓ ' + qs + ' questions</span>'
+    + '</div></div></div>';
 
   if (ch.keywords && ch.keywords.length) {
     const kw = ch.keywords.join(',').split(',').map(k=>k.trim()).filter(k=>k);
