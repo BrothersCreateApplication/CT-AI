@@ -377,7 +377,7 @@ function handleRoute() {
   const hash = window.location.hash.slice(1) || 'home';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('border-secondary', 'text-secondary'));
-  document.querySelectorAll('.fab-quiz-btn').forEach(b => b.classList.add('hidden'));
+  // (fab-quiz-btn removed)
   window.scrollTo(0,0);
 
   if (hash === 'home') { showCourseSelector(); return; }
@@ -397,8 +397,7 @@ function handleRoute() {
     AppState.currentPage = 'chapter'; AppState.currentChapter = parseInt(cm[1]);
     trackChapterVisit(parseInt(cm[1]));
     renderChapter(AppState.currentChapter);
-    document.getElementById('fab-quiz')?.classList.remove('hidden');
-    document.getElementById('fab-quiz').onclick = () => navigate(`quiz-${cm[1]}`);
+    // (fab-quiz removed)
     return;
   }
   if (qm) {
