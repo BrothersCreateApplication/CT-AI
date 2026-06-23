@@ -571,18 +571,17 @@ function renderChapter(n) {
 
   var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
   var chImgs = [
-    'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=300&fit=crop',    // AI brain
-    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&h=300&fit=crop',    // colorful tech
-    'https://images.unsplash.com/photo-1527474305487-b87b222841cc?w=800&h=300&fit=crop',    // abstract technology
-    'https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?w=800&h=300&fit=crop',    // laptop coding
-    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=300&fit=crop',       // data dashboard
-    'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=300&fit=crop',       // network
-    'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=300&fit=crop'     // person typing
+    'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1527474305487-b87b222841cc?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80'
   ];
-  let html = '<div class="relative overflow-hidden rounded-xl mb-6 text-white min-h-[140px] md:min-h-[160px] flex items-end" style="background:#0a1628">'
-    + '<img src="' + chImgs[n-1] + '" alt="Chapter ' + n + '" class="absolute inset-0 w-full h-full object-cover" loading="lazy" onerror="this.style.display=\'none\'">'
-    + '<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>'
-    + '<div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent"></div>'
+  let html = '<div class="relative overflow-hidden rounded-xl mb-6 text-white min-h-[160px] md:min-h-[180px] flex items-end" style="background:#0a1628">'
+    + '<img src="' + chImgs[n-1] + '" alt="" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display=\'none\'">'
+    + '<div class="absolute inset-0 bg-gradient-to-t from-[#0a1628]/95 via-[#0a1628]/40 to-transparent"></div>'
     + '<div class="relative z-10 p-5 md:p-7 w-full">'
     + '<div class="flex items-center gap-3 mb-2">'
     + '<span class="text-3xl">' + icons[n-1] + '</span>'
