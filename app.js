@@ -488,7 +488,7 @@ function renderChapter(n) {
   const pageMap = {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63};
 
   var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
-  var iconColors = ['from-red-500 to-rose-600','from-emerald-500 to-teal-600','from-orange-500 to-red-500','from-sky-500 to-blue-600','from-violet-500 to-purple-600','from-pink-500 to-rose-500','from-cyan-500 to-teal-500'];
+  var iconColors = ['from-slate-800 to-blue-900','from-emerald-700 to-teal-800','from-blue-800 to-indigo-900','from-cyan-700 to-blue-800','from-violet-700 to-purple-800','from-blue-800 to-indigo-900','from-teal-700 to-cyan-800'];
   let html = '<div class="relative overflow-hidden rounded-xl bg-gradient-to-br ' + iconColors[n-1] + ' p-5 md:p-7 mb-6 text-white">'
     + '<div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-8 -mt-8 blur-2xl"></div>'
     + '<div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-6 -mb-6 blur-xl"></div>'

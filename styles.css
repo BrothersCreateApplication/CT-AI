@@ -6,36 +6,36 @@
 /* ===== DESIGN TOKENS ===== */
 :root {
   /* Colors */
-  --surface: #faf8f7;
-  --surface-dim: #e8e3e0;
-  --surface-bright: #faf8f7;
+  --surface: #f7f9fb;
+  --surface-dim: #d8dadc;
+  --surface-bright: #f7f9fb;
   --surface-container-lowest: #ffffff;
-  --surface-container-low: #f5f0ed;
-  --surface-container: #ede8e5;
-  --surface-container-high: #e5e0dd;
-  --surface-container-highest: #ddd8d5;
-  --on-surface: #1c1816;
-  --on-surface-variant: #4a4542;
+  --surface-container-low: #f2f4f6;
+  --surface-container: #eceef0;
+  --surface-container-high: #e6e8ea;
+  --surface-container-highest: #e0e3e5;
+  --on-surface: #191c1e;
+  --on-surface-variant: #44474d;
   --inverse-surface: #2d3133;
   --inverse-on-surface: #eff1f3;
-  --outline: #7b7673;
-  --outline-variant: #cdc8c4;
-  --surface-tint: #c8102e;
+  --outline: #75777e;
+  --outline-variant: #c5c6cd;
+  --surface-tint: #515f78;
 
-  --primary: #c8102e;
+  --primary: #000000;
   --on-primary: #ffffff;
-  --primary-container: #fff0f0;
-  --on-primary-container: #8c001a;
+  --primary-container: #0d1c32;
+  --on-primary-container: #76849f;
 
-  --secondary: #e85d2c;
+  --secondary: #0058bb;
   --on-secondary: #ffffff;
-  --secondary-container: #ff6b3d;
-  --on-secondary-container: #ffffff;
+  --secondary-container: #1471e6;
+  --on-secondary-container: #fefcff;
 
-  --tertiary: #c8102e;
+  --tertiary: #000000;
   --on-tertiary: #ffffff;
-  --tertiary-container: #c8102e;
-  --on-tertiary-container: #ffffff;
+  --tertiary-container: #0b1c30;
+  --on-tertiary-container: #75859d;
 
   --error: #ba1a1a;
   --on-error: #ffffff;
