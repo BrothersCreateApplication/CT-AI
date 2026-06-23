@@ -276,6 +276,17 @@ function toggleBilingualPdf(ch) {
   window.open('songngu.html?ch=' + ch + '&page=1', '_blank');
 }
 
+function getKLevel(qId) {
+  try {
+    var a = ANSWERS_DATA[qId];
+    if (!a || !a.kLevel) return null;
+    var k = a.kLevel;
+    var names = {K1:'📖 Nhớ', K2:'📗 Hiểu', K3:'🔧 Áp dụng', K4:'📊 Phân tích'};
+    var colors = {K1:'#6b7280', K2:'#2563eb', K3:'#d97706', K4:'#7c3aed'};
+    return {level: k, name: names[k] || k, color: colors[k] || '#6b7280'};
+  } catch(e) { return null; }
+}
+
 // ===== QUIZ =====
 let quizState = {};
 
@@ -311,6 +322,10 @@ function renderQuiz(n) {
         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-error rounded-sm"></span> Flagged</span>
         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-surface-container-highest rounded-sm"></span> Unseen</span>
       </div>
+      <div class="flex justify-center gap-2 text-xs text-on-surface-variant mt-2 border-t border-outline-variant pt-2">
+        <span class="flex items-center gap-1"><span class="px-1 rounded text-[10px] font-bold" style="background:#2563eb20;color:#2563eb">K2</span> Hiểu</span>
+        <span class="flex items-center gap-1"><span class="px-1 rounded text-[10px] font-bold" style="background:#d9770620;color:#d97706">K3</span> Áp dụng</span>
+      </div>
       <button class="btn w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold mt-4 scale-98-active" id="btn-submit" onclick="submitQuiz()">Submit All</button>
       <p class="text-caption font-caption text-on-surface-variant text-center mt-2">Auto-save enabled</p>
     </div>
@@ -328,9 +343,10 @@ function renderQuiz(n) {
     const inputType = q.selectType === 'multiple' ? 'checkbox' : 'radio';
     const name = inputType === 'checkbox' ? `q${q.id}` : qid;
 
+    var kInfo = getKLevel(q.id);
     html += `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 mb-4" id="card-${qid}">
       <div class="flex justify-between items-center mb-3">
-        <span class="text-sm font-semibold text-secondary">Q${q.id} · ${q.lo || ''}</span>
+        <span class="text-sm font-semibold text-secondary">Q${q.id} · ${q.lo || ''} ${kInfo ? '<span class="ml-1.5 px-1.5 py-0.5 rounded text-[11px] font-bold" style="background:'+kInfo.color+'20;color:'+kInfo.color+'">'+kInfo.level+' '+kInfo.name+'</span>' : ''}</span>
         <div class="flex items-center gap-2">
           <span class="text-caption font-caption text-on-surface-variant px-2 py-0.5 bg-surface-container rounded-full">${q.points} pt</span>
           <button class="text-on-surface-variant hover:text-secondary transition-all bg-transparent border-none cursor-pointer p-0.5" onclick="toggleFlag(${q.id})" title="Flag for review">
@@ -599,6 +615,10 @@ function renderFullExam() {
         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-error rounded-sm"></span> Flagged</span>
         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-surface-container-highest rounded-sm"></span> Unseen</span>
       </div>
+      <div class="flex justify-center gap-2 text-xs text-on-surface-variant mt-2 border-t border-outline-variant pt-2">
+        <span class="flex items-center gap-1"><span class="px-1 rounded text-[10px] font-bold" style="background:#2563eb20;color:#2563eb">K2</span> Hiểu</span>
+        <span class="flex items-center gap-1"><span class="px-1 rounded text-[10px] font-bold" style="background:#d9770620;color:#d97706">K3</span> Áp dụng</span>
+      </div>
       <button class="btn w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold mt-4 scale-98-active" id="btn-exam-submit" onclick="submitFullExam()">Submit Exam</button>
       <p class="text-caption font-caption text-on-surface-variant text-center mt-2">All 7 chapters · ${allQuestions.length} questions</p>
     </div>
@@ -622,9 +642,10 @@ function renderFullExam() {
     const qid = `exam-q${q.id}`;
     const inputType = q.selectType === 'multiple' ? 'checkbox' : 'radio';
 
+    var kInfo = getKLevel(q.id);
     html += `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 mb-4" id="exam-card-${qid}">
       <div class="flex justify-between items-center mb-3">
-        <span class="text-sm font-semibold text-secondary">Q${idx+1} (Ch.${q.chapter}) · ${q.lo || ''}</span>
+        <span class="text-sm font-semibold text-secondary">Q${idx+1} (Ch.${q.chapter}) · ${q.lo || ''} ${kInfo ? '<span class="ml-1.5 px-1.5 py-0.5 rounded text-[11px] font-bold" style="background:'+kInfo.color+'20;color:'+kInfo.color+'">'+kInfo.level+' '+kInfo.name+'</span>' : ''}</span>
         <div class="flex items-center gap-2">
           <span class="text-caption font-caption text-on-surface-variant px-2 py-0.5 bg-surface-container rounded-full">${q.points} pt</span>
           <button class="text-on-surface-variant hover:text-secondary transition-all bg-transparent border-none cursor-pointer p-0.5" onclick="toggleExamFlag(${q.id})" title="Flag for review">
