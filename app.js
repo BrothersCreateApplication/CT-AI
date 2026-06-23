@@ -33,6 +33,49 @@ function resumeLearning() {
   navigate('chapter-' + lastCh);
 }
 
+const CHAPTER_SUMMARIES = {
+  1: '<div class="mb-3"><strong class="text-blue-700">1. Phân biệt Hệ thống AI và Hệ thống Truyền thống (AI-1.1.1)</strong></div>'
+    + '<div class="pl-3 mb-3 space-y-1.5">'
+    + '<p>• <strong>Thiết kế:</strong> Truyền thống dùng mệnh lệnh rõ ràng (if-then-else). AI phân tích mẫu (patterns) từ dữ liệu.</p>'
+    + '<p>• <strong>Hành vi:</strong> Truyền thống xác định (deterministic), dễ dự đoán. AI dựa trên xác suất, kết quả không phải lúc nào cũng dự đoán trước.</p>'
+    + '<p>• <strong>Tính giải thích:</strong> AI (Deep Learning) thường là "hộp đen", khó giải thích quyết định.</p>'
+    + '<p>• <strong>Khả năng thích ứng:</strong> Truyền thống tĩnh. AI tự học (self-learning) và cải thiện liên tục.</p>'
+    + '</div>'
+    + '<div class="mb-3"><strong class="text-blue-700">2. Các cấp độ của AI (AI-1.1.2)</strong></div>'
+    + '<div class="pl-3 mb-3 space-y-1.5">'
+    + '<p><strong>• Narrow AI (AI hẹp):</strong> Nhiệm vụ cụ thể (nhận diện khuôn mặt, dịch thuật). Loại duy nhất đang triển khai thực tế.</p>'
+    + '<p><strong>• Frontier AI:</strong> Tập con tiên tiến của Narrow AI, GenAI quy mô lớn.</p>'
+    + '<p><strong>• General AI (AI tổng quát):</strong> Như con người. Chưa có hệ thống nào đạt mức này.</p>'
+    + '<p><strong>• Super AI (Siêu trí tuệ):</strong> Vượt xa con người. Điểm kỳ dị công nghệ (technological singularity).</p>'
+    + '</div>'
+    + '<div class="mb-3"><strong class="text-blue-700">3. Các loại hình Công nghệ AI (AI-1.1.3)</strong></div>'
+    + '<div class="pl-3 mb-3 space-y-1.5">'
+    + '<p><strong>• Machine Learning (ML):</strong> Supervised (có nhãn), Unsupervised (không nhãn), Reinforcement (thử-và-sai).</p>'
+    + '<p><strong>• Deep Learning (DL):</strong> CNN (hình ảnh), RNN (chuỗi), Transformers (LLMs).</p>'
+    + '<p><strong>• Công nghệ khác:</strong> NLP, Computer Vision, Fuzzy logic, Expert systems, Agentic AI.</p>'
+    + '</div>'
+    + '<div class="mb-3"><strong class="text-blue-700">4. GenAI (AI-1.1.4)</strong></div>'
+    + '<div class="pl-3 mb-3 space-y-1.5">'
+    + '<p>• Tạo nội dung mới (văn bản, hình ảnh, âm thanh) từ dữ liệu huấn luyện.</p>'
+    + '<p>• Công nghệ: GANs, Diffusion models, Transformers. Thường dùng Foundation Models + fine-tuning.</p>'
+    + '</div>'
+    + '<div class="mb-3"><strong class="text-blue-700">5. Phần cứng & Hosting (AI-1.1.5, AI-1.1.6)</strong></div>'
+    + '<div class="pl-3 mb-3 space-y-1.5">'
+    + '<p><strong>• Phần cứng:</strong> GPU > CPU cho ML. ASIC cho edge computing. Quantization để tăng tốc.</p>'
+    + '<p><strong>• Hosting:</strong> Local (riêng tư, kiểm soát) vs Cloud (linh hoạt, AIaaS).</p>'
+    + '</div>'
+    + '<div class="mb-3"><strong class="text-blue-700">6. ML Frameworks (AI-1.1.7)</strong></div>'
+    + '<div class="pl-3 mb-3 space-y-1.5">'
+    + '<p>• Xử lý dữ liệu → Xây dựng mô hình → Huấn luyện → Đánh giá → Triển khai.</p>'
+    + '<p>• Low-level API (tùy biến cao) vs High-level API (đơn giản hóa).</p>'
+    + '</div>'
+    + '<div class="mb-3"><strong class="text-blue-700">7. Quy định & Tiêu chuẩn (AI-1.1.8)</strong></div>'
+    + '<div class="pl-3 space-y-1.5">'
+    + '<p><strong>• EU AI Act:</strong> Tiếp cận dựa trên rủi ro. Hệ thống rủi ro cao phải kiểm thử và giám sát nghiêm ngặt.</p>'
+    + '<p><strong>• ISO/IEC TR 29119-11:</strong> Hướng dẫn kiểm thử hệ thống AI.</p>'
+    + '</div>'
+};
+
 function resetProgress() {
   if (confirm('Reset all study progress? This will clear visited chapters, quiz history, and exam attempts.')) {
     localStorage.removeItem('ctai_chapter_visits');
@@ -263,6 +306,18 @@ function renderChapter(n) {
     + '<a class="btn inline-flex items-center bg-secondary text-on-secondary px-6 py-3 rounded-lg font-bold scale-98-active no-underline" href="/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + n + '#page=' + (pageMap[n] || 13) + '" target="_blank" rel="noopener noreferrer" onclick="this.href=this.href.split(\'&\')[0]+\'&\'+Date.now()+\'#\'+this.href.split(\'#\')[1]">📘 Học với English</a>'
     + '<a class="btn inline-flex items-center border-2 border-secondary text-secondary px-6 py-3 rounded-lg font-bold hover:bg-secondary hover:text-on-secondary transition-all scale-98-active no-underline" href="songngu.html?ch=' + n + '&page=1" target="_blank" rel="noopener noreferrer">📖 Học với Song ngữ</a>'
     + '</div></div>';
+
+  // Chapter summary (if available)
+  var summaries = CHAPTER_SUMMARIES[n];
+  if (summaries) {
+    html += '<details open class="bg-blue-50 border border-blue-200 rounded-lg mb-5 overflow-hidden">'
+      + '<summary class="text-sm font-semibold text-blue-800 px-4 py-3 cursor-pointer hover:bg-blue-100/50 transition-colors select-none flex items-center gap-2">'
+      + '<span class="material-symbols-outlined text-[18px]">summarize</span> 📝 Tóm tắt ý chính'
+      + '<span class="ml-auto text-xs text-blue-600 font-normal">click to toggle</span>'
+      + '</summary>'
+      + '<div class="px-4 pb-3 pt-1"><div class="text-sm text-on-surface leading-relaxed space-y-2">' + summaries + '</div></div>'
+      + '</details>';
+  }
 
   html += '<div class="flex justify-center mt-8">'
     + '<button class="btn bg-secondary text-on-secondary px-6 py-2.5 rounded-lg font-bold scale-98-active" onclick="navigate(\'quiz-' + n + '\')">📝 Take Chapter ' + n + ' Quiz (' + qs + ')</button>'
