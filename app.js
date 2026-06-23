@@ -63,10 +63,10 @@ function showCourseSelector() {
       + '<p class="text-base md:text-lg text-white/70">' + c.subtitle + '</p>'
       + '</div>'
       + '<div class="p-5 md:p-6">'
-      + '<p class="text-sm md:text-base text-gray-400 mb-4 leading-relaxed">' + c.desc + '</p>'
-      + '<div class="flex items-center gap-4 md:gap-6 text-sm md:text-base text-gray-500">'
-      + '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span> <span class="text-gray-300 font-medium">' + c.chapters + '</span> chapters</span>'
-      + '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span> <span class="text-gray-300 font-medium">' + c.questions + '</span> questions</span>'
+      + '<p class="text-sm md:text-base text-slate-300 mb-4 leading-relaxed font-medium">' + c.desc + '</p>'
+      + '<div class="flex items-center gap-4 md:gap-6 text-sm md:text-base text-slate-400">'
+      + '<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ' + (id === 'ct-ai' ? 'bg-blue-400' : 'bg-violet-400') + '"></span> <span class="text-white font-semibold">' + c.chapters + '</span> chapters</span>'
+      + '<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ' + (id === 'ct-ai' ? 'bg-blue-400' : 'bg-violet-400') + '"></span> <span class="text-white font-semibold">' + c.questions + '</span> questions</span>'
       + '</div>'
       + '</div></div>';
   });
