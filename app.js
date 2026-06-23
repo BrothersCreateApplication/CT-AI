@@ -500,13 +500,13 @@ function renderHomePage() {
     'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=400&q=80',
     'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=400&q=80'
   ];
-  var chGrid = '<div class="col-span-12"><div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-2 md:gap-3">';
+  var chGrid = '<div class="col-span-12"><div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
   SYLLABUS_DATA.forEach(function(ch) {
     const idx = ch.chapter - 1;
     const qs = QUESTIONS_DATA.filter(function(q) { return q.chapter === ch.chapter; }).length;
-    chGrid += '<div class="cursor-pointer group" onclick="navigate(\'chapter-' + ch.chapter + '\')">'
-      + '<div class="rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow transition-all duration-200">'
-      + '<div class="relative overflow-hidden" style="aspect-ratio:1">'
+    chGrid += '<div class="cursor-pointer group flex" onclick="navigate(\'chapter-' + ch.chapter + '\')">'
+      + '<div class="w-full rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow transition-all duration-200 flex flex-col">'
+      + '<div class="relative overflow-hidden flex-1" style="min-height:100px">'
       + '<img src="' + chImgs[idx] + '" alt="" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.background=\'linear-gradient(135deg, #1e1b4b, #3730a3)\'">'
       + '<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>'
       + '<div class="absolute bottom-2 left-2 right-2 flex items-center gap-2 text-[10px] text-white/70">'
