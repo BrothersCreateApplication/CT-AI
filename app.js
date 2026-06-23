@@ -5,8 +5,8 @@ const AppState = { currentPage: 'home', currentChapter: null, currentCourse: nul
 
 // ===== COURSE SYSTEM =====
 var COURSES = {
-  'ct-ai': { id:'ct-ai', title:'CT-AI Foundation', short:'CT-AI', subtitle:'AI Testing Certification', desc:'ISTQB Certified Tester AI Testing v2.0 — study platform with syllabus, quizzes, and full exam.', icon:'🤖', color:'#0058bb', chapters:7, questions:43 },
-  'ctfl':  { id:'ctfl', title:'CTFL Foundation', short:'CTFL', subtitle:'Software Testing Foundation', desc:'ISTQB Certified Tester Foundation Level — core testing concepts and best practices.', icon:'🧪', color:'#2e7d32', chapters:6, questions:40, coming:true }
+  'ct-ai': { id:'ct-ai', title:'CT-AI Foundation', short:'CT-AI', subtitle:'AI Testing Certification', desc:'ISTQB Certified Tester AI Testing v2.0 — syllabus, quizzes, and full exam for AI testing certification.', icon:'🤖', color:'#0058bb', chapters:7, questions:43 },
+  'gen-ai': { id:'gen-ai', title:'GEN-AI Foundation', short:'GEN-AI', subtitle:'Testing with Generative AI', desc:'ISTQB Certified Tester Testing with Generative AI — learn to test GenAI systems, LLMs, and prompt engineering.', icon:'⚡', color:'#7c3aed', chapters:6, questions:40, coming:true }
 };
 
 function getCurrentCourse() {
@@ -66,18 +66,26 @@ function showCourseSelector() {
   grid.innerHTML = '';
   Object.keys(COURSES).forEach(function(id) {
     var c = COURSES[id];
-    grid.innerHTML += '<div class="relative overflow-hidden rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group bg-surface-container-lowest p-6 md:p-8 text-left ' + (c.coming ? 'border-dashed border-outline-variant opacity-70' : 'border-outline-variant hover:border-secondary') + '" onclick="selectCourse(\'' + id + '\')">'
-      + (c.coming ? '<span class="absolute top-4 right-4 px-3 py-1 bg-amber-50 text-amber-600 text-xs font-bold rounded-full border border-amber-200">COMING SOON</span>' : '')
-      + '<div class="text-5xl mb-4">' + c.icon + '</div>'
-      + '<h3 class="font-display text-xl font-bold text-primary mb-1">' + c.title + '</h3>'
-      + '<p class="text-sm text-secondary font-medium mb-3">' + c.subtitle + '</p>'
-      + '<p class="text-sm text-on-surface-variant mb-4 leading-relaxed">' + c.desc + '</p>'
-      + '<div class="flex items-center gap-4 text-xs text-on-surface-variant">'
-      + '<span class="flex items-center gap-1"><span class="font-semibold text-primary">' + c.chapters + '</span> chapters</span>'
-      + '<span class="flex items-center gap-1"><span class="font-semibold text-primary">' + c.questions + '</span> questions</span>'
+    var colors = {'ct-ai': ['from-blue-500 to-indigo-600', 'bg-blue-50', 'text-blue-600', 'border-blue-200', '#0058bb'], 'gen-ai': ['from-violet-500 to-purple-600', 'bg-violet-50', 'text-violet-600', 'border-violet-200', '#7c3aed']};
+    var clr = colors[id] || colors['ct-ai'];
+    grid.innerHTML += '<div class="relative overflow-hidden rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group bg-white ' + (c.coming ? 'border-dashed border-gray-200 opacity-70' : 'border-gray-200 hover:border-secondary') + '" onclick="selectCourse(\'' + id + '\')">'
+      + '<div class="bg-gradient-to-br ' + clr[0] + ' p-6 md:p-8 text-white relative">'
+      + '<div class="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-6 -mt-6 blur-2xl"></div>'
+      + '<div class="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full -ml-4 -mb-4 blur-xl"></div>'
+      + (c.coming ? '<span class="absolute top-4 right-4 px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full backdrop-blur-sm border border-white/20">COMING SOON</span>' : '')
+      + '<div class="relative z-10">'
+      + '<div class="text-4xl mb-3">' + c.icon + '</div>'
+      + '<h3 class="font-display text-2xl font-bold mb-0.5">' + c.title + '</h3>'
+      + '<p class="text-white/80 text-sm font-medium">' + c.subtitle + '</p>'
+      + '</div></div>'
+      + '<div class="p-5">'
+      + '<p class="text-sm text-gray-600 mb-4 leading-relaxed">' + c.desc + '</p>'
+      + '<div class="flex items-center gap-4 text-xs text-gray-500 mb-4">'
+      + '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span> <strong class="text-gray-800">' + c.chapters + '</strong> chapters</span>'
+      + '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span> <strong class="text-gray-800">' + c.questions + '</strong> questions</span>'
       + '</div>'
-      + (c.coming ? '' : '<div class="mt-4 flex items-center gap-1 text-sm font-medium text-secondary group-hover:gap-2 transition-all">Start Learning <span class="material-symbols-outlined text-[18px]">arrow_forward</span></div>')
-      + '</div>';
+      + (c.coming ? '<div class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-400"><span class="material-symbols-outlined text-[18px]">lock</span> Coming Soon</div>' : '<div class="inline-flex items-center gap-1.5 text-sm font-medium text-secondary group-hover:gap-2.5 transition-all">Start Learning <span class="material-symbols-outlined text-[18px]">arrow_forward</span></div>')
+      + '</div></div>';
   });
 }
 
@@ -86,7 +94,6 @@ function selectCourse(id) {
   if (id === getCurrentCourse()) { navigate('home'); return; }
   setCurrentCourse(id);
   navigate('home');
-  setTimeout(showCourseSelector, 50);
 }
 
 function updateHeaderCourse() {
