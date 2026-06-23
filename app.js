@@ -429,6 +429,19 @@ function setActiveNav(el) {
 
 // ===== SIDEBAR =====
 function buildSidebar() {
+  var sidebar = document.getElementById('sidebar');
+  // Hide sidebar if no course selected
+  var courseId = getCurrentCourse();
+  if (!courseId) { sidebar.style.display = 'none'; return; }
+  sidebar.style.display = ''; // show sidebar
+  var course = COURSES[courseId];
+  if (course) {
+    var titleEl = document.getElementById('sidebar-title');
+    var subEl = document.getElementById('sidebar-sub');
+    if (titleEl) titleEl.textContent = course.title;
+    if (subEl) subEl.textContent = course.subtitle + ' · Syllabus v2.0';
+  }
+
   const icons = ['info','psychology','biotech','quiz','database','model_training','deployed_code'];
   document.getElementById('chapter-list').innerHTML = SYLLABUS_DATA.map(ch =>
     `<a href="#chapter-${ch.chapter}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant text-sm font-medium no-underline border-l-[3px] border-transparent" data-chapter="${ch.chapter}">
@@ -1387,8 +1400,6 @@ function initSearch() {
 
 // ===== INIT =====
 function init() {
-  var footer = document.getElementById('course-footer');
-  if (footer && getCurrentCourse()) footer.style.display = '';
   buildSidebar();
   renderHomePage();
   initSearch();

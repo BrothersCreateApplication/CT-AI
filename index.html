@@ -99,10 +99,10 @@ code { font-family: 'JetBrains Mono', monospace; }
 
 <div class="flex max-w-container-max mx-auto pt-16 min-h-screen">
   <!-- ===== SIDEBAR ===== -->
-  <aside id="sidebar" class="w-sidebar-width h-[calc(100vh-64px)] sticky top-16 left-0 bg-surface-container-low border-r border-outline-variant hidden md:flex flex-col p-4 overflow-y-auto z-40 transition-all">
-    <div class="mb-5 px-2">
-      <h2 class="font-display text-title-md text-primary mb-0.5">AI Testing Certification</h2>
-      <p class="text-sm text-on-surface-variant opacity-70">Syllabus v2.0</p>
+  <aside id="sidebar" class="w-sidebar-width h-[calc(100vh-64px)] sticky top-16 left-0 bg-surface-container-low border-r border-outline-variant hidden md:flex-col p-4 overflow-y-auto z-40 transition-all">
+    <div class="mb-5 px-2" id="sidebar-header">
+      <h2 class="font-display text-title-md text-primary mb-0.5" id="sidebar-title">AI Testing Certification</h2>
+      <p class="text-sm text-on-surface-variant opacity-70" id="sidebar-sub">Syllabus v2.0</p>
     </div>
     <nav class="flex-1 space-y-0.5" id="chapter-list"></nav>
     <button class="btn w-full bg-secondary text-on-secondary py-2.5 rounded-lg font-bold mt-3 mb-2 scale-98-active" id="btn-quick-quiz">📝 Quick Practice</button>
