@@ -1,31 +1,105 @@
 // CT-AI Academy - Study Application
 // Design: Academic, Precise, Future-Proof
 
-const AppState = { currentPage: 'home', currentChapter: null };
+const AppState = { currentPage: 'home', currentChapter: null, currentCourse: null };
+
+// ===== COURSE SYSTEM =====
+var COURSES = {
+  'ct-ai': { id:'ct-ai', title:'CT-AI Foundation', short:'CT-AI', subtitle:'AI Testing Certification', desc:'ISTQB Certified Tester AI Testing v2.0 — study platform with syllabus, quizzes, and full exam.', icon:'🤖', color:'#0058bb', chapters:7, questions:43 },
+  'ctfl':  { id:'ctfl', title:'CTFL Foundation', short:'CTFL', subtitle:'Software Testing Foundation', desc:'ISTQB Certified Tester Foundation Level — core testing concepts and best practices.', icon:'🧪', color:'#2e7d32', chapters:6, questions:40, coming:true }
+};
+
+function getCurrentCourse() {
+  try { var c = localStorage.getItem('ctai_course') || 'ct-ai'; return COURSES[c] ? c : 'ct-ai'; } catch(e) { return 'ct-ai'; }
+}
+
+function setCurrentCourse(id) {
+  if (!COURSES[id]) return;
+  localStorage.setItem('ctai_course', id);
+  localStorage.setItem('ctai_chapter_visits_' + id, '[]');
+  localStorage.setItem('ctai_last_chapter_' + id, '1');
+  AppState.currentCourse = id;
+}
+
+function courseKey(key) {
+  var c = getCurrentCourse();
+  return key + '_' + c;
+}
 
 // ===== PROGRESS TRACKING =====
+
 function trackChapterVisit(chapter) {
   if (!chapter) return;
+  var prefix = getCoursePrefix();
   try {
-    const visits = JSON.parse(localStorage.getItem('ctai_chapter_visits') || '[]');
+    const visits = JSON.parse(localStorage.getItem(prefix + 'chapter_visits') || '[]');
     if (!visits.includes(chapter)) visits.push(chapter);
-    localStorage.setItem('ctai_chapter_visits', JSON.stringify(visits));
-    localStorage.setItem('ctai_last_chapter', String(chapter));
+    localStorage.setItem(prefix + 'chapter_visits', JSON.stringify(visits));
+    localStorage.setItem(prefix + 'last_chapter', String(chapter));
   } catch(e) { /* ignore */ }
 }
 
 function getLastVisitedChapter() {
-  try { return parseInt(localStorage.getItem('ctai_last_chapter')) || 1; } catch(e) { return 1; }
+  var prefix = getCoursePrefix();
+  try { return parseInt(localStorage.getItem(prefix + 'last_chapter')) || 1; } catch(e) { return 1; }
 }
 
 function getVisitedChapters() {
-  try { return JSON.parse(localStorage.getItem('ctai_chapter_visits') || '[]'); } catch(e) { return []; }
+  var prefix = getCoursePrefix();
+  try { return JSON.parse(localStorage.getItem(prefix + 'chapter_visits') || '[]'); } catch(e) { return []; }
 }
 
 function getStudyProgress() {
   const visited = getVisitedChapters();
   const total = SYLLABUS_DATA.length;
   return { visited: visited.length, total, pct: total > 0 ? Math.round((visited.length / total) * 100) : 0 };
+}
+
+function getCoursePrefix() {
+  return 'ctai_';
+}
+
+function showCourseSelector() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-course-select').classList.add('active');
+  var grid = document.getElementById('course-list');
+  grid.innerHTML = '';
+  Object.keys(COURSES).forEach(function(id) {
+    var c = COURSES[id];
+    var active = getCurrentCourse() === id;
+    grid.innerHTML += '<div class="relative overflow-hidden rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg ' + (active ? 'border-secondary shadow-md' : 'border-outline-variant hover:border-secondary') + ' bg-surface-container-lowest p-5" onclick="selectCourse(\'' + id + '\')">'
+      + (c.coming ? '<span class="absolute top-3 right-3 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">COMING SOON</span>' : '')
+      + '<div class="text-3xl mb-2">' + c.icon + '</div>'
+      + '<h3 class="font-display text-title-md mb-1">' + c.title + '</h3>'
+      + '<p class="text-sm text-on-surface-variant mb-3">' + c.subtitle + '</p>'
+      + '<p class="text-xs text-on-surface-variant mb-3 leading-relaxed">' + c.desc + '</p>'
+      + '<div class="flex gap-3 text-xs text-on-surface-variant">'
+      + '<span>' + c.chapters + ' chapters</span>'
+      + '<span>' + c.questions + ' questions</span>'
+      + '</div>'
+      + (active ? '<div class="mt-3"><span class="px-2 py-0.5 bg-secondary text-white text-[10px] font-bold rounded-full">CURRENT</span></div>' : '')
+      + '</div>';
+  });
+  updateHeaderCourse();
+}
+
+function selectCourse(id) {
+  if (COURSES[id].coming) { alert('This course is coming soon!'); return; }
+  if (id === getCurrentCourse()) { navigate('home'); return; }
+  setCurrentCourse(id);
+  navigate('home');
+  setTimeout(showCourseSelector, 50);
+}
+
+function updateHeaderCourse() {
+  var id = getCurrentCourse();
+  var c = COURSES[id];
+  if (c) {
+    var badge = document.getElementById('header-course-badge');
+    var name = document.getElementById('header-course-name');
+    if (badge) badge.textContent = c.icon;
+    if (name) name.textContent = c.short;
+  }
 }
 
 function resumeLearning() {
@@ -351,6 +425,7 @@ function handleRoute() {
     trackChapterVisit(parseInt(qm[1]));
     renderQuiz(AppState.currentChapter); return;
   }
+  if (hash === 'course-select') { showCourseSelector(); return; }
   if (hash === 'full-exam') {
     document.getElementById('page-full-exam').classList.add('active');
     document.querySelector('.nav-link[href="#full-exam"]')?.classList.add('border-secondary', 'text-secondary');
@@ -1330,6 +1405,7 @@ function initSearch() {
 
 // ===== INIT =====
 function init() {
+  updateHeaderCourse();
   buildSidebar();
   renderHomePage();
   initSearch();
@@ -1347,5 +1423,7 @@ window.renderFullExam = renderFullExam; window.submitFullExam = submitFullExam; 
 window.onExamChange = onExamChange; window.toggleExamFlag = toggleExamFlag;
 window.resumeLearning = resumeLearning;
 window.resetProgress = resetProgress;
+window.showCourseSelector = showCourseSelector;
+window.selectCourse = selectCourse;
 
 document.addEventListener('DOMContentLoaded', init);
