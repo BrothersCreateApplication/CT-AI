@@ -66,19 +66,21 @@ function showCourseSelector() {
   grid.innerHTML = '';
   Object.keys(COURSES).forEach(function(id) {
     var c = COURSES[id];
-    grid.innerHTML += '<div class="relative overflow-hidden rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group bg-surface-container-lowest p-6 md:p-8 text-left ' + (c.coming ? 'border-dashed border-outline-variant opacity-70' : 'border-outline-variant hover:border-secondary') + '" onclick="selectCourse(\'' + id + '\')">'
-      + (c.coming ? '<span class="absolute top-4 right-4 px-3 py-1 bg-amber-50 text-amber-600 text-xs font-bold rounded-full border border-amber-200">COMING SOON</span>' : '')
-      + '<div class="text-5xl mb-4">' + c.icon + '</div>'
-      + '<h3 class="font-display text-xl font-bold text-primary mb-1">' + c.title + '</h3>'
-      + '<p class="text-sm text-secondary font-medium mb-3">' + c.subtitle + '</p>'
-      + '<p class="text-sm text-on-surface-variant mb-4 leading-relaxed">' + c.desc + '</p>'
-      + '<div class="flex items-center gap-4 text-xs text-on-surface-variant">'
-      + '<span class="flex items-center gap-1"><span class="font-semibold text-primary">' + c.chapters + '</span> chapters</span>'
-      + '<span class="flex items-center gap-1"><span class="font-semibold text-primary">' + c.questions + '</span> questions</span>'
+    var active = getCurrentCourse() === id;
+    grid.innerHTML += '<div class="relative overflow-hidden rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg ' + (active ? 'border-secondary shadow-md' : 'border-outline-variant hover:border-secondary') + ' bg-surface-container-lowest p-5" onclick="selectCourse(\'' + id + '\')">'
+      + (c.coming ? '<span class="absolute top-3 right-3 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">COMING SOON</span>' : '')
+      + '<div class="text-3xl mb-2">' + c.icon + '</div>'
+      + '<h3 class="font-display text-title-md mb-1">' + c.title + '</h3>'
+      + '<p class="text-sm text-on-surface-variant mb-3">' + c.subtitle + '</p>'
+      + '<p class="text-xs text-on-surface-variant mb-3 leading-relaxed">' + c.desc + '</p>'
+      + '<div class="flex gap-3 text-xs text-on-surface-variant">'
+      + '<span>' + c.chapters + ' chapters</span>'
+      + '<span>' + c.questions + ' questions</span>'
       + '</div>'
-      + (c.coming ? '' : '<div class="mt-4 flex items-center gap-1 text-sm font-medium text-secondary group-hover:gap-2 transition-all">Start Learning <span class="material-symbols-outlined text-[18px]">arrow_forward</span></div>')
+      + (active ? '<div class="mt-3"><span class="px-2 py-0.5 bg-secondary text-white text-[10px] font-bold rounded-full">CURRENT</span></div>' : '')
       + '</div>';
   });
+  updateHeaderCourse();
 }
 
 function selectCourse(id) {
@@ -398,9 +400,6 @@ function handleRoute() {
   window.scrollTo(0,0);
 
   if (hash === 'home') {
-    // Check if course is selected, otherwise show course selector
-    var hasCourse = localStorage.getItem('ctai_course');
-    if (!hasCourse) { showCourseSelector(); return; }
     document.getElementById('page-home').classList.add('active');
     document.querySelector('.nav-link[href="#home"]')?.classList.add('border-secondary', 'text-secondary');
     AppState.currentPage = 'home'; AppState.currentChapter = null;
@@ -426,6 +425,7 @@ function handleRoute() {
     trackChapterVisit(parseInt(qm[1]));
     renderQuiz(AppState.currentChapter); return;
   }
+  if (hash === 'course-select') { showCourseSelector(); return; }
   if (hash === 'full-exam') {
     document.getElementById('page-full-exam').classList.add('active');
     document.querySelector('.nav-link[href="#full-exam"]')?.classList.add('border-secondary', 'text-secondary');
@@ -560,16 +560,8 @@ function renderHomePage() {
       totalQuizzes += (h['ch' + i] || []).length;
     } catch(e) {}
   }
-  var quizEl = document.getElementById('quiz-attempts');
+  const quizEl = document.getElementById('quiz-attempts');
   if (quizEl) quizEl.textContent = totalQuizzes;
-  // Inline course switch at bottom
-  var gridEl = document.getElementById('home-chapters');
-  if (gridEl) {
-    var switchBtn = document.getElementById('course-switch-btn');
-    if (!switchBtn) {
-      gridEl.insertAdjacentHTML('afterend', '<div class="mt-6 text-center border-t border-outline-variant pt-4"><button id="course-switch-btn" class="text-sm text-on-surface-variant/60 hover:text-secondary transition-all bg-transparent border-none cursor-pointer" onclick="showCourseSelector()">↺ Switch to another course</button></div>');
-    }
-  }
 }
 
 function getDuration(c) { return ({1:'120 min',2:'45 min',3:'375 min',4:'195 min',5:'180 min',6:'225 min',7:'30 min'})[c]||''; }
