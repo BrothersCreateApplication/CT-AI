@@ -93,11 +93,10 @@ code { font-family: 'JetBrains Mono', monospace; }
         <span class="material-symbols-outlined absolute left-3 text-on-surface-variant pointer-events-none" style="font-size:20px;">search</span>
         <input type="text" id="search-input" placeholder="Search..." class="w-48 pl-9 pr-3 py-1.5 text-sm bg-surface-container-low border border-outline-variant rounded focus:border-secondary focus:bg-surface-container-lowest focus:outline-none transition-all"/>
       </div>
-      <button class="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-lg text-sm font-medium text-secondary hover:bg-surface-container-high transition-all border border-outline-variant cursor-pointer" id="btn-course-switch" onclick="showCourseSelector()">
+      <span class="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-secondary/5 rounded text-xs text-secondary font-medium">
         <span id="header-course-badge">🤖</span>
         <span id="header-course-name">CT-AI</span>
-        <span class="material-symbols-outlined text-[16px]">expand_more</span>
-      </button>
+      </span>
     </div>
   </div>
 </header>
@@ -189,12 +188,19 @@ code { font-family: 'JetBrains Mono', monospace; }
       </div>
     </div>
 
-    <!-- COURSE SELECTOR -->
-    <div id="page-course-select" class="page">
-      <div class="max-w-3xl mx-auto">
-        <h1 class="font-display text-headline-lg text-primary mb-2">Select Course</h1>
-        <p class="text-on-surface-variant text-body-md mb-6">Choose a certification course to study.</p>
-        <div class="grid gap-4 md:grid-cols-2" id="course-list"></div>
+    <!-- COURSE SELECTOR — LANDING PAGE -->
+    <div id="page-course-select" class="page min-h-screen flex items-center justify-center px-4">
+      <div class="max-w-4xl w-full text-center">
+        <div class="mb-8">
+          <div class="flex items-center justify-center gap-3 mb-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/11/FPT_logo_2010.svg" alt="FPT" class="h-10" onerror="this.style.display='none'">
+            <span class="font-bold text-3xl text-primary font-display">GHC.GHS</span>
+          </div>
+          <h1 class="font-display text-4xl md:text-5xl font-bold text-primary mb-3">ISTQB Academy</h1>
+          <p class="text-on-surface-variant text-lg md:text-xl max-w-xl mx-auto">Choose your certification path. Study anytime, anywhere.</p>
+        </div>
+        <div class="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto" id="course-list"></div>
+        <p class="text-on-surface-variant/50 text-xs mt-8">More courses coming soon</p>
       </div>
     </div>
 
