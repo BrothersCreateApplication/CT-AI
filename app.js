@@ -500,7 +500,6 @@ function renderHomePage() {
     'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=400&q=80',
     'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=400&q=80'
   ];
-  var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
   var chGrid = '<div class="col-span-12"><div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-2 md:gap-3">';
   SYLLABUS_DATA.forEach(function(ch) {
     const idx = ch.chapter - 1;
@@ -509,17 +508,15 @@ function renderHomePage() {
       + '<div class="rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow transition-all duration-200">'
       + '<div class="relative overflow-hidden" style="aspect-ratio:1">'
       + '<img src="' + chImgs[idx] + '" alt="" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.background=\'linear-gradient(135deg, #1e1b4b, #3730a3)\'">'
-      + '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>'
-      + '<div class="absolute top-2 left-2 flex items-center gap-1.5">'
-      + '<span class="text-base">' + icons[idx] + '</span>'
-      + '<span class="text-[10px] font-bold text-white/80 uppercase tracking-wider">Ch ' + ch.chapter + '</span>'
-      + '</div>'
-      + '<div class="absolute bottom-2 left-2 right-2">'
-      + '<h4 class="text-white font-bold text-xs leading-tight">' + (ch.title.length > 30 ? ch.title.slice(0,30)+'...' : ch.title) + '</h4>'
-      + '<div class="flex items-center gap-2 mt-1 text-[10px] text-white/50">'
+      + '<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>'
+      + '<div class="absolute bottom-2 left-2 right-2 flex items-center gap-2 text-[10px] text-white/70">'
       + '<span>⏱ ' + getDuration(ch.chapter) + '</span>'
-      + '<span>' + qs + ' q</span>'
-      + '</div></div></div></div></div>';
+      + '<span>❓ ' + qs + '</span>'
+      + '</div></div>'
+      + '<div class="px-2 py-1.5 bg-white">'
+      + '<div class="text-[11px] text-on-surface-variant font-semibold leading-tight">Ch ' + ch.chapter + '</div>'
+      + '<div class="text-xs text-primary font-bold leading-tight truncate">' + (ch.title.length > 25 ? ch.title.slice(0,25)+'...' : ch.title) + '</div>'
+      + '</div></div></div>';
   });
   chGrid += '</div></div>';
   grid.innerHTML = chGrid;
