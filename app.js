@@ -430,29 +430,28 @@ function setActiveNav(el) {
 // ===== SIDEBAR =====
 function buildSidebar() {
   var sidebar = document.getElementById('sidebar');
-  // Hide sidebar if no course selected
   var courseId = getCurrentCourse();
-  if (!courseId) { sidebar.style.display = 'none'; return; }
-  sidebar.style.display = ''; // show sidebar
-  var course = COURSES[courseId];
-  if (course) {
-    var titleEl = document.getElementById('sidebar-title');
-    var subEl = document.getElementById('sidebar-sub');
-    if (titleEl) titleEl.textContent = course.title;
-    if (subEl) subEl.textContent = course.subtitle + ' · Syllabus v2.0';
-  }
-
-  const icons = ['info','psychology','biotech','quiz','database','model_training','deployed_code'];
-  document.getElementById('chapter-list').innerHTML = SYLLABUS_DATA.map(ch =>
+  if (courseId) {
+    if (sidebar) sidebar.style.display = '';
+    var course = COURSES[courseId];
+    if (course) {
+      var titleEl = document.getElementById('sidebar-title');
+      var subEl = document.getElementById('sidebar-sub');
+      if (titleEl) titleEl.textContent = course.title;
+      if (subEl) subEl.textContent = course.subtitle + ' · Syllabus v2.0';
+    }
+    // Build chapter list
+    const icons = ['info','psychology','biotech','quiz','database','model_training','deployed_code'];
+    document.getElementById('chapter-list').innerHTML = SYLLABUS_DATA.map(ch =>
     `<a href="#chapter-${ch.chapter}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant text-sm font-medium no-underline border-l-[3px] border-transparent" data-chapter="${ch.chapter}">
       <span class="material-symbols-outlined text-secondary/70" style="font-size:20px;">${icons[ch.chapter-1]||'article'}</span>
       <span>Ch ${ch.chapter}: ${ch.title}</span>
     </a>`
   ).join('');
 
-  // Add Full Exam link after chapters
-  const sidebarNav = document.getElementById('chapter-list');
-  sidebarNav.insertAdjacentHTML('beforeend',
+    // Add Full Exam link after chapters
+    const sidebarNav = document.getElementById('chapter-list');
+    sidebarNav.insertAdjacentHTML('beforeend',
     `<div class="border-t border-outline-variant my-2 pt-2">
       <a href="#full-exam" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant text-sm font-medium no-underline border-l-[3px] border-transparent" data-chapter="full">
         <span class="material-symbols-outlined text-secondary" style="font-size:20px;">assignment</span>
@@ -460,6 +459,7 @@ function buildSidebar() {
       </a>
     </div>`
   );
+  } // end if (courseId)
 
   document.getElementById('sidebar-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('open');
   document.querySelectorAll('.sidebar-link').forEach(a => a.addEventListener('click', () => {
