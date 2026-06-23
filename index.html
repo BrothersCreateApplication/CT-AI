@@ -93,11 +93,6 @@ code { font-family: 'JetBrains Mono', monospace; }
         <span class="material-symbols-outlined absolute left-3 text-on-surface-variant pointer-events-none" style="font-size:20px;">search</span>
         <input type="text" id="search-input" placeholder="Search..." class="w-48 pl-9 pr-3 py-1.5 text-sm bg-surface-container-low border border-outline-variant rounded focus:border-secondary focus:bg-surface-container-lowest focus:outline-none transition-all"/>
       </div>
-      <button class="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-lg text-sm font-medium text-secondary hover:bg-surface-container-high transition-all border border-outline-variant cursor-pointer" id="btn-course-switch" onclick="showCourseSelector()">
-        <span id="header-course-badge">🤖</span>
-        <span id="header-course-name">CT-AI</span>
-        <span class="material-symbols-outlined text-[16px]">expand_more</span>
-      </button>
     </div>
   </div>
 </header>
@@ -186,15 +181,6 @@ code { font-family: 'JetBrains Mono', monospace; }
 
         <!-- Chapter Cards -->
         <div class="col-span-12 chapters-grid" id="home-chapters"></div>
-      </div>
-    </div>
-
-    <!-- COURSE SELECTOR -->
-    <div id="page-course-select" class="page">
-      <div class="max-w-3xl mx-auto">
-        <h1 class="font-display text-headline-lg text-primary mb-2">Select Course</h1>
-        <p class="text-on-surface-variant text-body-md mb-6">Choose a certification course to study.</p>
-        <div class="grid gap-4 md:grid-cols-2" id="course-list"></div>
       </div>
     </div>
 
