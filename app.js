@@ -242,7 +242,7 @@ function renderChapter(n) {
   }
 
   if (ch.learningObjectives && ch.learningObjectives.length) {
-    html += '<details class="bg-amber-50 border border-amber-200 rounded-lg mb-5 overflow-hidden">'
+    html += '<details open class="bg-amber-50 border border-amber-200 rounded-lg mb-5 overflow-hidden">'
       + '<summary class="text-sm font-semibold text-amber-800 px-4 py-3 cursor-pointer hover:bg-amber-100/50 transition-colors select-none flex items-center gap-2">'
       + '<span class="material-symbols-outlined text-[18px]">emoji_objects</span> Learning Objectives (' + ch.learningObjectives.length + ')'
       + '<span class="ml-auto text-xs text-amber-600 font-normal">click to expand</span>'
