@@ -431,7 +431,9 @@ function setActiveNav(el) {
 function buildSidebar() {
   var sidebar = document.getElementById('sidebar');
   var courseId = getCurrentCourse();
-  if (courseId) {
+  if (!courseId) { if (sidebar) sidebar.style.display = 'none'; }
+  else {
+    if (sidebar) sidebar.style.display = '';
     if (sidebar) sidebar.style.display = '';
     var course = COURSES[courseId];
     if (course) {
