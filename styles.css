@@ -777,42 +777,51 @@ a:hover { text-decoration: underline; }
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .sidebar { width: 280px; }
-  .resume-card { grid-column: span 12; }
-  .stats-card { grid-column: span 6; }
   .search-box input { width: 180px; }
+  .logo { font-size: 20px; }
 }
 @media (max-width: 768px) {
   .sidebar-toggle { display: block; }
   .nav-links { display: none; }
-  .search-box input { width: 140px; }
-  .sidebar { position: fixed; transform: translateX(-100%); }
+  .search-box { display: none; }
+  .sidebar { position: fixed; left: 0; top: 64px; width: 280px; transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.15); }
-  .main-content { padding: var(--space-md); margin-bottom: 68px; overflow-x: hidden; }
-  .bento-grid { gap: var(--space-md); }
-  .stats-card { grid-column: span 12; }
+  .main-content { padding: 14px; margin-bottom: 64px; overflow-x: hidden; }
+  .bento-grid { gap: 14px; }
   .chapters-grid { grid-template-columns: 1fr; }
   .mobile-bottom-nav { display: flex; }
-  .page-title { font-size: 24px; line-height: 32px; }
-  .resume-title { font-size: 24px; line-height: 32px; }
-  .bento-section-title { font-size: 20px; }
-  .glass-card { flex-direction: column !important; }
-  .glass-card .btn { width: 100%; justify-content: center; }
-  .bento-grid > div:first-child { min-height: 140px !important; }
-  .stats-row { gap: var(--space-sm); }
-  .stat-card { font-size: 12px; padding: 6px 12px; }
+
+  /* Hero card */
+  .bento-grid > div:first-child { min-height: auto !important; }
+  .bento-grid > div:first-child img { height: 140px; object-position: center 30%; }
+  .bento-grid > div:first-child .flex-col { gap: 10px !important; }
+  .bento-grid > div:first-child .flex-col.md\\:flex-row { flex-direction: column !important; }
+  .bento-grid > div:first-child svg { width: 56px; height: 56px; }
+  .bento-grid > div:first-child svg + span { font-size: 14px !important; margin-top: -42px !important; margin-left: 16px !important; }
+  .bento-grid > div:first-child h2 { font-size: 18px !important; }
+  .bento-grid > div:first-child p { font-size: 13px !important; }
+
+  /* Full exam card */
+  .bento-grid > div:last-of-type .flex-col { flex-direction: column !important; }
+  .bento-grid > div:last-of-type button { width: 100%; }
+
+  /* Chapter page */
+  #chapter-content h1 { font-size: 20px !important; }
+  #chapter-content .lo-box { padding: 12px; }
+
+  /* Quiz */
   #full-exam-content, #quiz-content { flex-direction: column; }
   .option-card { padding: 10px !important; font-size: 13px !important; }
-  #chapter-content h1 { font-size: 22px !important; }
-}
+  #quiz-sidebar, #exam-sidebar { width: 100% !important; }
 
-@media (max-width: 480px) {
-  .search-box { display: none; }
-  .user-name { display: none; }
-  .main-content { padding: 12px; }
-  .stats-row { gap: 6px; }
-  .stat-card { font-size: 11px; padding: 5px 10px; }
+  /* Nav header */
+  .logo { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
 }
 @media (max-width: 480px) {
-  .search-box { display: none; }
   .user-name { display: none; }
+  .main-content { padding: 10px; margin-bottom: 60px; }
+  .bento-grid { gap: 10px; }
+  .logo { font-size: 16px; max-width: 130px; }
+  .chapter-card h4 { font-size: 14px; }
+  .btn { font-size: 13px; padding: 8px 14px; }
 }
