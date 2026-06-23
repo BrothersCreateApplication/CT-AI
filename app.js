@@ -7,13 +7,13 @@ const COURSES = {
     id:'ct-ai', title:'CT-AI Foundation', short:'CT-AI', subtitle:'Certified Tester AI Testing',
     desc:'Master AI testing with ISTQB\'s official syllabus. Covers ML testing, data quality, model validation, and AI system testing.',
     icon:'🤖', color:'#0058bb', gradient:'from-blue-600 to-indigo-700', chapters:7, questions:43,
-    img:'https://images.unsplash.com/photo-1531746790095-e5cb1781c3fe?w=600&h=400&fit=crop&auto=format'
+    img:'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=400&fit=crop&auto=format'
   },
   'ct-genai': {
     id:'ct-genai', title:'CT-GenAI Foundation', short:'GenAI', subtitle:'Testing with Generative AI',
     desc:'Learn to test GenAI systems, LLMs, prompt engineering, and AI-powered applications.',
     icon:'⚡', color:'#7c3aed', gradient:'from-violet-600 to-purple-700', chapters:6, questions:40,
-    img:'https://images.unsplash.com/photo-1527474305487-b87b222841cc?w=600&h=400&fit=crop&auto=format',
+    img:'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&h=400&fit=crop&auto=format',
     coming:true
   }
 };
