@@ -147,11 +147,21 @@ var pageSize = {1:7, 2:5, 3:12, 4:8, 5:8, 6:9, 7:2};
 
 function loadPages() {
   var pdfPage = startPage + currentPage - 1;
-  var t = Date.now();
-  var base = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + chapter + '&p=' + currentPage;
-  var baseVn = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?ch=' + chapter + '&p=' + currentPage;
-  document.getElementById('en-frame').src = base + '&t=' + t + '#page=' + pdfPage;
-  document.getElementById('vn-frame').src = baseVn + '&t=' + (t+1) + '#page=' + pdfPage;
+  var uid = Date.now() + '-' + Math.random().toString(36).slice(2,6);
+  var enUrl = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?uid=' + uid + '&ch=' + chapter + '&p=' + currentPage + '#page=' + pdfPage;
+  var vnUrl = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?uid=' + uid + '&ch=' + chapter + '&p=' + currentPage + '#page=' + pdfPage;
+  var enEl = document.getElementById('en-frame');
+  var vnEl = document.getElementById('vn-frame');
+  // Force fresh load by toggling display
+  enEl.style.display = 'none';
+  vnEl.style.display = 'none';
+  enEl.src = enUrl;
+  vnEl.src = vnUrl;
+  // Show after a tick so Edge re-renders from scratch
+  requestAnimationFrame(function() {
+    enEl.style.display = '';
+    vnEl.style.display = '';
+  });
   document.getElementById('page-info').textContent = 'Ch' + chapter + ' · Page ' + currentPage + '/' + (pageSize[chapter] || 15) + '  (PDF ' + pdfPage + ')';
 }
 
