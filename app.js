@@ -491,35 +491,36 @@ function updateSidebar(hash) {
 // ===== HOME =====
 function renderHomePage() {
   const grid = document.getElementById('home-chapters');
-  const themes = [
-    { gradient: 'linear-gradient(135deg, #1e1b4b, #3730a3, #312e81)', icon: 'psychology', accent: '#c084fc', tag: 'Fundamentals' },
-    { gradient: 'linear-gradient(135deg, #064e3b, #047857, #065f46)', icon: 'verified', accent: '#34d399', tag: 'Quality' },
-    { gradient: 'linear-gradient(135deg, #7c2d12, #9a3412, #c2410c)', icon: 'neurology', accent: '#fb923c', tag: 'Algorithms' },
-    { gradient: 'linear-gradient(135deg, #0c4a6e, #075985, #0e7490)', icon: 'bug_report', accent: '#38bdf8', tag: 'Testing' },
-    { gradient: 'linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed)', icon: 'database', accent: '#a78bfa', tag: 'Data' },
-    { gradient: 'linear-gradient(135deg, #831843, #9d174d, #be185d)', icon: 'model_training', accent: '#f472b6', tag: 'Model' },
-    { gradient: 'linear-gradient(135deg, #164e63, #155e75, #0e7490)', icon: 'developer_mode', accent: '#22d3ee', tag: 'DevOps' }
+  var chImgs = [
+    'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1527474305487-b87b222841cc?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=400&q=80'
   ];
+  var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
+  var gradients = ['from-violet-900 to-indigo-800','from-emerald-800 to-teal-700','from-blue-800 to-indigo-900','from-sky-800 to-blue-800','from-purple-800 to-fuchsia-700','from-rose-800 to-pink-700','from-teal-800 to-cyan-700'];
   grid.innerHTML = SYLLABUS_DATA.map(ch => {
-    const t = themes[ch.chapter - 1] || themes[0];
+    const idx = ch.chapter - 1;
     const qs = QUESTIONS_DATA.filter(q => q.chapter === ch.chapter).length;
-    return `<div class="col-span-12 md:col-span-6 lg:col-span-4 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden cursor-pointer hover:border-[${t.accent}] hover:shadow-lg transition-all duration-300 group" onclick="navigate('chapter-${ch.chapter}')">
-      <div class="h-28 relative overflow-hidden flex items-center justify-center" style="background:${t.gradient}">
-        <!-- Decorative glow blobs -->
-        <div class="absolute w-24 h-24 rounded-full opacity-25" style="background:${t.accent};top:-30px;right:-10px;filter:blur(28px)"></div>
-        <div class="absolute w-20 h-20 rounded-full opacity-15" style="background:white;bottom:-25px;left:-15px;filter:blur(20px)"></div>
-        <div class="absolute w-12 h-12 rounded-full opacity-20" style="background:${t.accent};bottom:5px;right:15px;filter:blur(16px)"></div>
-        <!-- Icon -->
-        <span class="material-symbols-outlined relative z-10 text-white/85 transition-transform duration-300 group-hover:scale-110" style="font-size:46px;font-variation-settings:'FILL'1">${t.icon}</span>
-        <!-- Tag label -->
-        <span class="absolute bottom-1.5 left-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">${t.tag}</span>
-      </div>
-      <div class="p-4">
-        <h4 class="font-semibold text-base mb-0.5">${ch.chapter}. ${ch.title}</h4>
-        <p class="text-sm text-on-surface-variant">${ch.learningObjectives.length} learning objectives</p>
-        <div class="flex justify-between items-center mt-3 text-xs">
-          <span>⏱ ${getDuration(ch.chapter)}</span>
-          <span class="font-medium" style="color:${t.accent}">${qs} questions →</span>
+    return `<div class="col-span-12 md:col-span-6 lg:col-span-4 cursor-pointer group" onclick="navigate('chapter-${ch.chapter}')">
+      <div class="rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow-lg transition-all duration-300">
+        <div class="relative overflow-hidden" style="aspect-ratio:1">
+          <img src="${chImgs[idx]}" alt="" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.background='linear-gradient(135deg, #1e1b4b, #3730a3)'">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+          <div class="absolute top-3 left-3 flex items-center gap-2">
+            <span class="text-xl">${icons[idx]}</span>
+            <span class="text-xs font-bold text-white/80 uppercase tracking-wider">Ch ${ch.chapter}</span>
+          </div>
+          <div class="absolute bottom-3 left-3 right-3">
+            <h4 class="text-white font-bold text-sm md:text-base leading-tight">${ch.title.length > 40 ? ch.title.slice(0,40)+'…' : ch.title}</h4>
+            <div class="flex items-center gap-3 mt-1 text-xs text-white/60">
+              <span>⏱ ${getDuration(ch.chapter)}</span>
+              <span>${qs} questions</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>`;
