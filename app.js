@@ -501,30 +501,28 @@ function renderHomePage() {
     'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=400&q=80'
   ];
   var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
-  var gradients = ['from-violet-900 to-indigo-800','from-emerald-800 to-teal-700','from-blue-800 to-indigo-900','from-sky-800 to-blue-800','from-purple-800 to-fuchsia-700','from-rose-800 to-pink-700','from-teal-800 to-cyan-700'];
-  grid.innerHTML = SYLLABUS_DATA.map(ch => {
+  var chGrid = '<div class="col-span-12"><div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-2 md:gap-3">';
+  SYLLABUS_DATA.forEach(function(ch) {
     const idx = ch.chapter - 1;
-    const qs = QUESTIONS_DATA.filter(q => q.chapter === ch.chapter).length;
-    return `<div class="col-span-12 md:col-span-6 lg:col-span-4 cursor-pointer group" onclick="navigate('chapter-${ch.chapter}')">
-      <div class="rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow-lg transition-all duration-300">
-        <div class="relative overflow-hidden" style="aspect-ratio:1">
-          <img src="${chImgs[idx]}" alt="" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.background='linear-gradient(135deg, #1e1b4b, #3730a3)'">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-          <div class="absolute top-3 left-3 flex items-center gap-2">
-            <span class="text-xl">${icons[idx]}</span>
-            <span class="text-xs font-bold text-white/80 uppercase tracking-wider">Ch ${ch.chapter}</span>
-          </div>
-          <div class="absolute bottom-3 left-3 right-3">
-            <h4 class="text-white font-bold text-sm md:text-base leading-tight">${ch.title.length > 40 ? ch.title.slice(0,40)+'…' : ch.title}</h4>
-            <div class="flex items-center gap-3 mt-1 text-xs text-white/60">
-              <span>⏱ ${getDuration(ch.chapter)}</span>
-              <span>${qs} questions</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+    const qs = QUESTIONS_DATA.filter(function(q) { return q.chapter === ch.chapter; }).length;
+    chGrid += '<div class="cursor-pointer group" onclick="navigate(\'chapter-' + ch.chapter + '\')">'
+      + '<div class="rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow transition-all duration-200">'
+      + '<div class="relative overflow-hidden" style="aspect-ratio:1">'
+      + '<img src="' + chImgs[idx] + '" alt="" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.background=\'linear-gradient(135deg, #1e1b4b, #3730a3)\'">'
+      + '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>'
+      + '<div class="absolute top-2 left-2 flex items-center gap-1.5">'
+      + '<span class="text-base">' + icons[idx] + '</span>'
+      + '<span class="text-[10px] font-bold text-white/80 uppercase tracking-wider">Ch ' + ch.chapter + '</span>'
+      + '</div>'
+      + '<div class="absolute bottom-2 left-2 right-2">'
+      + '<h4 class="text-white font-bold text-xs leading-tight">' + (ch.title.length > 30 ? ch.title.slice(0,30)+'...' : ch.title) + '</h4>'
+      + '<div class="flex items-center gap-2 mt-1 text-[10px] text-white/50">'
+      + '<span>⏱ ' + getDuration(ch.chapter) + '</span>'
+      + '<span>' + qs + ' q</span>'
+      + '</div></div></div></div></div>';
+  });
+  chGrid += '</div></div>';
+  grid.innerHTML = chGrid;
 
   const fullExamCountEl = document.getElementById('full-exam-count');
   if (fullExamCountEl) fullExamCountEl.textContent = QUESTIONS_DATA.length;
