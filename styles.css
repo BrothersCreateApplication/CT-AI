@@ -316,7 +316,8 @@ a:hover { text-decoration: underline; }
   flex: 1;
   padding: var(--space-lg) var(--gutter) var(--space-xl);
   min-height: calc(100vh - var(--header-height));
-  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .page { display: none; }
 .page.active { display: block; }
@@ -786,7 +787,7 @@ a:hover { text-decoration: underline; }
   .search-box { display: none; }
   .sidebar { display: flex !important; position: fixed; left: 0; top: 64px; width: 280px; transform: translateX(-100%); }
   .sidebar.open { display: flex !important; transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.15); }
-  .main-content { padding: 14px; margin-bottom: 64px; }
+  .main-content { padding: 14px; margin-bottom: 64px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .bento-grid { gap: 14px; }
   .chapters-grid { grid-template-columns: 1fr; }
   .mobile-bottom-nav { display: flex; }
