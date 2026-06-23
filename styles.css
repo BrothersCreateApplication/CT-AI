@@ -810,10 +810,10 @@ a:hover { text-decoration: underline; }
   #chapter-content .lo-box { padding: 12px; }
   #chapter-content .btn { width: 100%; justify-content: center; }
 
-  /* Quiz - make submit accessible */
+  /* Quiz - make submit accessible on mobile */
   #full-exam-content, #quiz-content { flex-direction: column; }
   .option-card { padding: 10px !important; font-size: 13px !important; }
-  #quiz-sidebar, #exam-sidebar { width: 100% !important; position: static !important; margin-top: 16px; }
+  #quiz-sidebar, #exam-sidebar { display: block !important; width: 100% !important; position: static !important; margin-top: 16px; }
   #quiz-sidebar > div, #exam-sidebar > div { position: static !important; }
   #quiz-questions-area, #exam-questions-area { padding-bottom: 80px; }
 
