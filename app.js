@@ -878,32 +878,25 @@ function submitQuiz() {
   const historyHtml = renderQuizHistory(quizState.chapterNum);
 
   // Results summary
-  const ringCirc = 2*Math.PI*38;
-  const offset = ringCirc - (pct/100)*ringCirc;
-
   const summary = `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
     <div class="flex flex-col md:flex-row gap-6 items-center">
       <div class="text-center shrink-0">
-        <svg class="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e8ea" stroke-width="8"/>
-          <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${ringCirc}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
-        </svg>
-        <div class="text-2xl font-bold font-display -mt-16">${pct}%</div>
-        <span class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold" style="${pass ? 'background:#e8f5e9;color:#2e7d32' : 'background:#ffebee;color:#ba1a1a'}">${pass ? 'PASS' : 'FAIL'}</span>
-        <p class="text-caption font-caption text-on-surface-variant mt-1">Required: 65%</p>
+        <div class="relative inline-flex items-center justify-center w-24 h-24">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e8ea" stroke-width="8"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
+          </svg>
+          <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold font-display">${pct}%</span>
+        </div>
+        <div class="flex items-center justify-center gap-2 mt-3">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold" style="${pass ? 'background:#e8f5e9;color:#2e7d32' : 'background:#ffebee;color:#ba1a1a'}">${pass ? '✓ PASS' : '✗ FAIL'}</span>
+          <span class="text-xs text-on-surface-variant">${correct}/${quizState.questions.length} correct</span>
+        </div>
       </div>
       <div class="flex-1">
         <h2 class="font-display text-headline-lg">${pass ? '🎉 Great job!' : '📖 Keep studying!'}</h2>
         <p class="text-on-surface-variant">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)</p>
-        <div class="mt-3 space-y-2">
-          ${['AI Fundamentals','Testing AI Systems','Ethics & Governance','Quality Assurance'].map((topic, i) =>
-            `<div class="flex items-center gap-3"><span class="text-xs w-32 shrink-0">${topic}</span>
-            <div class="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden">
-              <div class="h-full bg-secondary rounded-full" style="width:${60 + Math.random()*35}%"></div>
-            </div>
-            <span class="text-xs font-medium w-8 text-right">${Math.round(60 + Math.random()*35)}%</span></div>`
-          ).join('')}
-        </div>
+        <div class="mt-2 text-sm">${wrongIds.length > 0 ? '<span class="text-error font-medium">❌ Wrong:</span> Q' + wrongIds.join(', Q') : '<span class="text-success font-medium">🎯 All correct!</span>'}</div>
       </div>
     </div>
     <div class="flex justify-center gap-3 mt-4">
@@ -1195,14 +1188,10 @@ function submitFullExam() {
   const historyHtml = renderExamHistory();
 
   // Results summary
-  const ringCirc = 2*Math.PI*38;
-  const offset = ringCirc - (pct/100)*ringCirc;
-
   // Build chapter breakdown bars
   const chBars = Object.keys(chapterStats).sort().map(ch => {
     const s = chapterStats[ch];
     const cPct = s.total > 0 ? Math.round((s.correct/s.total)*100) : 0;
-    const chTitle = SYLLABUS_DATA.find(d => d.chapter === parseInt(ch))?.title || `Chapter ${ch}`;
     return `<div class="flex items-center gap-3">
       <span class="text-xs w-8 shrink-0 font-semibold">Ch ${ch}</span>
       <div class="flex-1 h-2.5 bg-surface-container-high rounded-full overflow-hidden">
@@ -1215,17 +1204,21 @@ function submitFullExam() {
   const summary = `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">
     <div class="flex flex-col md:flex-row gap-6 items-center">
       <div class="text-center shrink-0">
-        <svg class="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e8ea" stroke-width="8"/>
-          <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${ringCirc}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
-        </svg>
-        <div class="text-2xl font-bold font-display -mt-16">${pct}%</div>
-        <span class="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold" style="${pass ? 'background:#e8f5e9;color:#2e7d32' : 'background:#ffebee;color:#ba1a1a'}">${pass ? 'PASS' : 'FAIL'}</span>
-        <p class="text-caption font-caption text-on-surface-variant mt-1">Required: 65%</p>
+        <div class="relative inline-flex items-center justify-center w-24 h-24">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e8ea" stroke-width="8"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="${pass ? '#2e7d32' : '#ba1a1a'}" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
+          </svg>
+          <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold font-display">${pct}%</span>
+        </div>
+        <div class="flex items-center justify-center gap-2 mt-3">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold" style="${pass ? 'background:#e8f5e9;color:#2e7d32' : 'background:#ffebee;color:#ba1a1a'}">${pass ? '✓ PASS' : '✗ FAIL'}</span>
+          <span class="text-xs text-on-surface-variant">${correct}/${quizState.questions.length}</span>
+        </div>
       </div>
       <div class="flex-1">
         <h2 class="font-display text-headline-lg">${pass ? '🎉 Congratulations!' : '📖 Keep studying!'}</h2>
-        <p class="text-on-surface-variant">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)</p>
+        <p class="text-on-surface-variant">You got <strong>${correct}/${quizState.questions.length}</strong> correct (${earned}/${totalPts} points)${wrongIds.length > 0 ? ' · ❌ Q' + wrongIds.join(', Q') : ' · 🎯 All correct!'}</p>
         <div class="mt-3 space-y-1.5">${chBars}</div>
       </div>
     </div>
