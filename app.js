@@ -570,17 +570,26 @@ function renderChapter(n) {
   const pageMap = {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63};
 
   var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
-  var iconColors = ['from-slate-800 to-blue-900','from-emerald-700 to-teal-800','from-blue-800 to-indigo-900','from-cyan-700 to-blue-800','from-violet-700 to-purple-800','from-blue-800 to-indigo-900','from-teal-700 to-cyan-800'];
-  let html = '<div class="relative overflow-hidden rounded-xl bg-gradient-to-br ' + iconColors[n-1] + ' p-5 md:p-7 mb-6 text-white">'
-    + '<div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-8 -mt-8 blur-2xl"></div>'
-    + '<div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-6 -mb-6 blur-xl"></div>'
-    + '<div class="relative z-10">'
+  var chImgs = [
+    'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=800&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=250&fit=crop'
+  ];
+  let html = '<div class="relative overflow-hidden rounded-xl mb-6 text-white min-h-[140px] md:min-h-[160px] flex items-end" style="background:#0a1628">'
+    + '<img src="' + chImgs[n-1] + '" alt="Chapter ' + n + '" class="absolute inset-0 w-full h-full object-cover" loading="lazy" onerror="this.style.display=\'none\'">'
+    + '<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>'
+    + '<div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent"></div>'
+    + '<div class="relative z-10 p-5 md:p-7 w-full">'
     + '<div class="flex items-center gap-3 mb-2">'
     + '<span class="text-3xl">' + icons[n-1] + '</span>'
-    + '<span class="text-xs font-semibold uppercase tracking-widest text-white/70">Chapter ' + n + ' · ' + getDuration(n) + '</span>'
+    + '<span class="text-xs font-semibold uppercase tracking-widest text-white/60">Chapter ' + n + ' · ' + getDuration(n) + '</span>'
     + '</div>'
     + '<h1 class="font-display text-2xl md:text-3xl font-bold">' + ch.title + '</h1>'
-    + '<div class="flex gap-4 mt-2 text-sm text-white/70">'
+    + '<div class="flex gap-4 mt-1 text-sm text-white/60">'
     + '<span>📄 Page ' + (pageMap[n] || '?') + '</span>'
     + '<span>❓ ' + qs + ' questions</span>'
     + '</div></div></div>';
