@@ -515,7 +515,7 @@ function renderHomePage() {
       + '</div></div>'
       + '<div class="px-2 py-1.5 bg-white">'
       + '<div class="text-[10px] text-on-surface-variant font-semibold">Chapter ' + ch.chapter + '</div>'
-      + '<div class="text-xs text-primary font-bold leading-snug">' + ch.title + '</div>'
+      + '<div class="text-xs text-primary font-bold leading-snug" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + ch.title + '</div>'
       + '</div></div></div>';
   });
   chGrid += '</div></div>';
