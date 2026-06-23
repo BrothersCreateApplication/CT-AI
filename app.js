@@ -75,8 +75,7 @@ function showCourseSelector() {
 function selectCourse(id) {
   if (COURSES[id].coming) { alert('This course is coming soon! Stay tuned.'); return; }
   setCurrentCourse(id);
-  window.location.hash = 'home';
-  location.reload();
+  window.location.hash = 'dashboard';
 }
 
 function resumeLearning() {
@@ -376,10 +375,11 @@ function handleRoute() {
   document.querySelectorAll('.fab-quiz-btn').forEach(b => b.classList.add('hidden'));
   window.scrollTo(0,0);
 
-  if (hash === 'home') {
-    if (!getCurrentCourse()) { showCourseSelector(); return; }
+  if (hash === 'home') { showCourseSelector(); return; }
+  if (hash === 'dashboard') {
+    if (!getCurrentCourse()) { navigate('home'); return; }
     document.getElementById('page-home').classList.add('active');
-    document.querySelector('.nav-link[href="#home"]')?.classList.add('border-secondary', 'text-secondary');
+    document.querySelector('.nav-link[href="#dashboard"]')?.classList.add('border-secondary', 'text-secondary');
     AppState.currentPage = 'home'; AppState.currentChapter = null;
     renderHomePage(); return;
   }
