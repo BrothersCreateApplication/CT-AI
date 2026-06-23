@@ -54,22 +54,17 @@ function showCourseSelector() {
   var keys = Object.keys(COURSES);
   keys.forEach(function(id) {
     var c = COURSES[id];
-    grid.innerHTML += '<div class="relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group bg-white/5 backdrop-blur-sm border ' + (c.coming ? 'border-white/10 opacity-60' : 'border-white/20 hover:border-white/40') + '" onclick="selectCourse(\'' + id + '\')">'
-      + '<div class="relative h-44 md:h-52 overflow-hidden">'
-      + '<img src="' + c.img + '" alt="' + c.title + '" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.display=\'none\'">'
-      + '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>'
-      + '<div class="absolute bottom-4 left-4 right-4">'
-      + '<div class="flex items-center gap-2 mb-1">'
-      + '<span class="text-2xl">' + c.icon + '</span>'
-      + '<h3 class="font-display text-xl font-bold text-white">' + c.title + '</h3>'
+    var grad = id === 'ct-ai' ? 'from-blue-600 to-indigo-700' : 'from-violet-600 to-purple-700';
+    grid.innerHTML += '<div class="relative rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group bg-white/5 backdrop-blur-sm border ' + (c.coming ? 'border-white/10 opacity-60' : 'border-white/20 hover:border-white/40') + '" onclick="selectCourse(\'' + id + '\')">'
+      + '<div class="bg-gradient-to-br ' + grad + ' px-6 py-8 md:py-10 text-center">'
+      + (c.coming ? '<span class="inline-block px-3 py-1 bg-black/30 text-white text-xs font-bold rounded-full border border-white/20">Coming Soon</span>' : '<span class="inline-block px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full">Available</span>')
+      + '<div class="text-5xl md:text-6xl mt-4 mb-3">' + c.icon + '</div>'
+      + '<h3 class="font-display text-2xl md:text-3xl font-bold text-white mb-1">' + c.title + '</h3>'
+      + '<p class="text-base md:text-lg text-white/70">' + c.subtitle + '</p>'
       + '</div>'
-      + '<p class="text-sm text-white/70">' + c.subtitle + '</p>'
-      + '</div>'
-      + (c.coming ? '<div class="absolute top-4 right-4 px-3 py-1.5 bg-black/40 backdrop-blur-sm text-white text-xs font-bold rounded-full border border-white/20">Coming Soon</div>' : '<div class="absolute top-4 right-4 px-3 py-1.5 bg-white/90 text-gray-900 text-xs font-bold rounded-full shadow-lg">Available</div>')
-      + '</div>'
-      + '<div class="p-5">'
-      + '<p class="text-sm text-gray-400 mb-4 leading-relaxed">' + c.desc + '</p>'
-      + '<div class="flex items-center gap-4 text-xs text-gray-500">'
+      + '<div class="p-5 md:p-6">'
+      + '<p class="text-sm md:text-base text-gray-400 mb-4 leading-relaxed">' + c.desc + '</p>'
+      + '<div class="flex items-center gap-4 md:gap-6 text-sm md:text-base text-gray-500">'
       + '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span> <span class="text-gray-300 font-medium">' + c.chapters + '</span> chapters</span>'
       + '<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span> <span class="text-gray-300 font-medium">' + c.questions + '</span> questions</span>'
       + '</div>'
