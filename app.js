@@ -7,13 +7,13 @@ const COURSES = {
     id:'ct-ai', title:'CT-AI Foundation', short:'CT-AI', subtitle:'Certified Tester AI Testing',
     desc:'Master AI testing with ISTQB\'s official syllabus. Covers ML testing, data quality, model validation, and AI system testing.',
     icon:'🤖', color:'#0058bb', gradient:'from-blue-600 to-indigo-700', chapters:7, questions:43,
-    img:'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=400&fit=crop&auto=format'
+    img:'https://images.unsplash.com/photo-1531746790095-e5cb1781c3fe?w=600&h=400&fit=crop&auto=format'
   },
   'ct-genai': {
     id:'ct-genai', title:'CT-GenAI Foundation', short:'GenAI', subtitle:'Testing with Generative AI',
     desc:'Learn to test GenAI systems, LLMs, prompt engineering, and AI-powered applications.',
     icon:'⚡', color:'#7c3aed', gradient:'from-violet-600 to-purple-700', chapters:6, questions:40,
-    img:'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&h=400&fit=crop&auto=format',
+    img:'https://images.unsplash.com/photo-1527474305487-b87b222841cc?w=600&h=400&fit=crop&auto=format',
     coming:true
   }
 };
@@ -571,13 +571,13 @@ function renderChapter(n) {
 
   var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
   var chImgs = [
-    'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=250&fit=crop',
-    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=250&fit=crop',
-    'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=250&fit=crop',
-    'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=800&h=250&fit=crop',
-    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=250&fit=crop',
-    'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&h=250&fit=crop',
-    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=250&fit=crop'
+    'https://images.unsplash.com/photo-1531746790095-e5cb1781c3fe?w=800&h=300&fit=crop',    // creative AI brain art
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&h=300&fit=crop',    // colorful tech
+    'https://images.unsplash.com/photo-1527474305487-b87b222841cc?w=800&h=300&fit=crop',    // abstract technology
+    'https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?w=800&h=300&fit=crop',    // laptop coding
+    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=300&fit=crop',       // data dashboard
+    'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=300&fit=crop',       // network
+    'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=300&fit=crop'     // person typing
   ];
   let html = '<div class="relative overflow-hidden rounded-xl mb-6 text-white min-h-[140px] md:min-h-[160px] flex items-end" style="background:#0a1628">'
     + '<img src="' + chImgs[n-1] + '" alt="Chapter ' + n + '" class="absolute inset-0 w-full h-full object-cover" loading="lazy" onerror="this.style.display=\'none\'">'
