@@ -818,13 +818,13 @@ a:hover { text-decoration: underline; }
   #quiz-questions-area, #exam-questions-area { padding-bottom: 80px; }
 
   /* Nav header */
-  .logo { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+  header .text-display-lg { font-size: 16px !important; line-height: 24px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
 }
 @media (max-width: 480px) {
   .user-name { display: none; }
   .main-content { padding: 10px; margin-bottom: 60px; }
   .bento-grid { gap: 10px; }
-  .logo { font-size: 16px; max-width: 130px; }
+  header .text-display-lg { font-size: 14px !important; max-width: 110px; }
   .chapter-card h4 { font-size: 14px; }
   .btn { font-size: 13px; padding: 8px 14px; }
 }
