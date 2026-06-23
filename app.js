@@ -513,9 +513,9 @@ function renderHomePage() {
       + '<span>⏱ ' + getDuration(ch.chapter) + '</span>'
       + '<span>❓ ' + qs + '</span>'
       + '</div></div>'
-      + '<div class="px-2 py-1.5 bg-white" style="min-height:40px">'
-      + '<div class="text-[10px] text-on-surface-variant font-semibold">Chapter ' + ch.chapter + '</div>'
-      + '<div class="text-xs text-primary font-bold leading-snug" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + ch.title + '</div>'
+      + '<div class="px-2 py-1.5 bg-white h-10 flex flex-col justify-center">'
+      + '<div class="text-[9px] text-on-surface-variant font-semibold leading-tight">Chapter ' + ch.chapter + '</div>'
+      + '<div class="text-[11px] text-primary font-bold leading-tight" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + ch.title + '</div>'
       + '</div></div></div>';
   });
   chGrid += '</div></div>';
