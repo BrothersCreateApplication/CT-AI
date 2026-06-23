@@ -504,16 +504,16 @@ function renderHomePage() {
   SYLLABUS_DATA.forEach(function(ch) {
     const idx = ch.chapter - 1;
     const qs = QUESTIONS_DATA.filter(function(q) { return q.chapter === ch.chapter; }).length;
-    chGrid += '<div class="cursor-pointer group flex" onclick="navigate(\'chapter-' + ch.chapter + '\')">'
-      + '<div class="w-full rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow transition-all duration-200 flex flex-col">'
-      + '<div class="relative overflow-hidden flex-1" style="min-height:100px">'
+    chGrid += '<div class="cursor-pointer group" onclick="navigate(\'chapter-' + ch.chapter + '\')">'
+      + '<div class="rounded-xl overflow-hidden border border-outline-variant hover:border-secondary hover:shadow transition-all duration-200">'
+      + '<div class="relative" style="aspect-ratio:1">'
       + '<img src="' + chImgs[idx] + '" alt="" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.parentElement.style.background=\'linear-gradient(135deg, #1e1b4b, #3730a3)\'">'
       + '<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>'
       + '<div class="absolute bottom-2 left-2 right-2 flex items-center gap-2 text-[10px] text-white/70">'
       + '<span>⏱ ' + getDuration(ch.chapter) + '</span>'
       + '<span>❓ ' + qs + '</span>'
       + '</div></div>'
-      + '<div class="px-2 py-1.5 bg-white">'
+      + '<div class="px-2 py-1.5 bg-white" style="min-height:40px">'
       + '<div class="text-[10px] text-on-surface-variant font-semibold">Chapter ' + ch.chapter + '</div>'
       + '<div class="text-xs text-primary font-bold leading-snug" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + ch.title + '</div>'
       + '</div></div></div>';
