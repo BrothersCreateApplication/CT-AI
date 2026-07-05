@@ -414,6 +414,12 @@ function handleRoute() {
     AppState.currentPage = 'full-exam'; AppState.currentChapter = null;
     renderFullExam(); return;
   }
+  if (hash === 'practice-exam') {
+    document.getElementById('page-practice-exam').classList.add('active');
+    document.querySelector('.nav-link[href="#practice-exam"]')?.classList.add('border-secondary', 'text-secondary');
+    AppState.currentPage = 'practice-exam'; AppState.currentChapter = null;
+    renderPracticeExam(); return;
+  }
   if (hash === 'practice') {
     window.location.hash = 'home';
     setTimeout(showQuickPractice, 100);
@@ -451,13 +457,17 @@ function buildSidebar() {
     </a>`
   ).join('');
 
-    // Add Full Exam link after chapters
+    // Add Exam links after chapters
     const sidebarNav = document.getElementById('chapter-list');
     sidebarNav.insertAdjacentHTML('beforeend',
     `<div class="border-t border-outline-variant my-2 pt-2">
       <a href="#full-exam" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant text-sm font-medium no-underline border-l-[3px] border-transparent" data-chapter="full">
         <span class="material-symbols-outlined text-secondary" style="font-size:20px;">assignment</span>
-        <span class="font-bold text-secondary">📋 Full Practice Exam</span>
+        <span class="font-bold text-secondary">📋 Bộ đề ôn tập syllabus</span>
+      </a>
+      <a href="#practice-exam" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant text-sm font-medium no-underline border-l-[3px] border-transparent" data-chapter="practice">
+        <span class="material-symbols-outlined text-[#7c3aed]" style="font-size:20px;">school</span>
+        <span class="font-bold" style="color:#7c3aed">🎯 Bộ đề thi thử</span>
       </a>
     </div>`
   );
@@ -485,6 +495,10 @@ function updateSidebar(hash) {
   }
   if (hash === 'full-exam') {
     const link = document.querySelector('.sidebar-link[data-chapter="full"]');
+    if (link) link.classList.add('bg-secondary-container', 'text-on-secondary-container', 'font-bold', 'border-secondary');
+  }
+  if (hash === 'practice-exam') {
+    const link = document.querySelector('.sidebar-link[data-chapter="practice"]');
     if (link) link.classList.add('bg-secondary-container', 'text-on-secondary-container', 'font-bold', 'border-secondary');
   }
 }
@@ -527,6 +541,8 @@ function renderHomePage() {
 
   const fullExamCountEl = document.getElementById('full-exam-count');
   if (fullExamCountEl) fullExamCountEl.textContent = QUESTIONS_DATA.length;
+  const practiceExamCountEl = document.getElementById('practice-exam-count');
+  if (practiceExamCountEl && typeof PRACTICE_QUESTIONS_DATA !== 'undefined') practiceExamCountEl.textContent = PRACTICE_QUESTIONS_DATA.length;
 
   // Progress ring + resume button
   const prog = getStudyProgress();
@@ -982,7 +998,7 @@ function renderFullExam() {
         <span class="flex items-center gap-1"><span class="px-1 rounded text-[10px] font-bold" style="background:#d9770620;color:#d97706">K3</span> Áp dụng</span>
       </div>
       <button class="btn w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold mt-4 scale-98-active" id="btn-exam-submit" onclick="submitFullExam()">Submit Exam</button>
-      <p class="text-caption font-caption text-on-surface-variant text-center mt-2">All 7 chapters · ${allQuestions.length} questions</p>
+      <p class="text-caption font-caption text-on-surface-variant text-center mt-2">7 chương · ${allQuestions.length} câu hỏi</p>
     </div>
   `;
 
@@ -994,8 +1010,8 @@ function renderFullExam() {
   ).join('');
 
   let html = `<div class="mb-4">
-    <h1 class="font-display text-headline-lg text-primary">📋 Full Practice Exam</h1>
-    <p class="text-on-surface-variant text-body-md">${allQuestions.length} questions across all chapters · 90 minutes · Passing score: 65%</p>
+    <h1 class="font-display text-headline-lg text-primary">📋 Bộ đề ôn tập syllabus</h1>
+    <p class="text-on-surface-variant text-body-md">${allQuestions.length} câu hỏi · 7 chương · 90 phút · Đạt: 65%</p>
     <div class="flex flex-wrap gap-1.5 mt-2">${chLabels}</div>
   </div>
   ${renderExamHistory()}`;
@@ -1268,6 +1284,374 @@ function retryFullExam() {
   setTimeout(function() { window.location.hash = 'full-exam'; }, 50);
 }
 
+// ===== PRACTICE EXAM =====
+function renderPracticeExam() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+  const allQuestions = PRACTICE_QUESTIONS_DATA;
+
+  if (!allQuestions.length) {
+    document.getElementById('practice-exam-questions-area').innerHTML = '<p class="text-on-surface-variant">No questions available.</p>';
+    document.getElementById('practice-exam-sidebar').innerHTML = '';
+    return;
+  }
+
+  window._practiceQuizState = { chapterNum: 'practice', questions: allQuestions, userAnswers: {}, submitted: false, score: null, flagged: new Set() };
+
+  var sideBar = document.getElementById('practice-exam-sidebar');
+  if (sideBar) sideBar.style.display = '';
+
+  document.getElementById('practice-exam-sidebar').innerHTML = `
+    <div class="sticky top-24 bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
+      <div class="text-center mb-4">
+        <p class="text-caption font-caption text-on-surface-variant tracking-wider uppercase">Time Remaining</p>
+        <p class="text-[32px] font-bold text-secondary font-display" id="practice-exam-timer">90:00</p>
+        <div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden mt-2">
+          <div class="h-full bg-secondary rounded-full" id="practice-exam-timer-bar" style="width:100%"></div>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-semibold">Question Navigator</span>
+        <span class="text-xs text-on-surface-variant" id="practice-exam-answered-count">0/${allQuestions.length}</span>
+      </div>
+      <div class="grid grid-cols-5 gap-1.5" id="practice-exam-nav-grid"></div>
+      <div class="flex justify-center gap-3 text-xs text-on-surface-variant mt-3">
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-secondary-container rounded-sm"></span> Answered</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-error rounded-sm"></span> Flagged</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-surface-container-highest rounded-sm"></span> Unseen</span>
+      </div>
+      <div class="flex justify-center gap-2 text-xs text-on-surface-variant mt-2 border-t border-outline-variant pt-2">
+        <span class="flex items-center gap-1"><span class="px-1 rounded text-[10px] font-bold" style="background:#2563eb20;color:#2563eb">K2</span> Hiểu</span>
+        <span class="flex items-center gap-1"><span class="px-1 rounded text-[10px] font-bold" style="background:#d9770620;color:#d97706">K3</span> Áp dụng</span>
+      </div>
+      <button class="btn w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold mt-4 scale-98-active" id="btn-practice-exam-submit" onclick="submitPracticeExam()">Submit Exam</button>
+      <p class="text-caption font-caption text-on-surface-variant text-center mt-2">${allQuestions.length} câu hỏi</p>
+    </div>
+  `;
+
+  const chCounts = {};
+  allQuestions.forEach(q => { chCounts[q.chapter] = (chCounts[q.chapter] || 0) + 1; });
+  const chLabels = Object.keys(chCounts).sort().map(ch =>
+    `<span class="text-xs px-2 py-0.5 bg-surface-container rounded-full">Ch ${ch}: ${chCounts[ch]}</span>`
+  ).join('');
+
+  let html = `<div class="mb-4">
+    <h1 class="font-display text-headline-lg" style="color:#7c3aed">🎯 Bộ đề thi thử</h1>
+    <p class="text-on-surface-variant text-body-md">${allQuestions.length} câu hỏi · 90 phút · Đạt: 65%</p>
+    <div class="flex flex-wrap gap-1.5 mt-2">${chLabels}</div>
+  </div>
+  ${renderPracticeExamHistory()}`;
+
+  allQuestions.forEach((q, idx) => {
+    const qid = `prac-q${q.id}`;
+    const inputType = q.selectType === 'multiple' ? 'checkbox' : 'radio';
+
+    var kInfo = getPracticeKLevel(q.id);
+    html += `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 mb-4" id="practice-card-${qid}">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-sm font-semibold text-secondary">Q${idx+1} (Ch.${q.chapter}) · ${q.lo || ''} ${kInfo ? '<span class="ml-1.5 px-1.5 py-0.5 rounded text-[11px] font-bold" style="background:'+kInfo.color+'20;color:'+kInfo.color+'">'+kInfo.level+' '+kInfo.name+'</span>' : ''}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-caption font-caption text-on-surface-variant px-2 py-0.5 bg-surface-container rounded-full">${q.points} pt</span>
+          <button class="text-on-surface-variant hover:text-secondary transition-all bg-transparent border-none cursor-pointer p-0.5" onclick="togglePracticeFlag('${q.id}')" title="Flag for review">
+            <span class="material-symbols-outlined text-[18px]" id="practice-flag-${qid}">flag</span>
+          </button>
+        </div>
+      </div>
+      <div class="text-sm mb-3 leading-relaxed" style="white-space:pre-wrap">${q.text}</div>
+      ${q.selectType === 'multiple' ? `<div class="text-xs text-on-surface-variant italic mb-2">Select ${q.selectCount} answers</div>` : ''}
+      <div class="space-y-2">`;
+
+    q.choices.forEach(c => {
+      const inputName = inputType === 'checkbox' ? `prac-q${q.id}-${c.key}` : `prac-q${q.id}`;
+      html += `<label class="option-card flex items-start gap-3 p-3 border ${inputType==='checkbox'?'':'has-[:checked]:border-2 has-[:checked]:border-secondary has-[:checked]:bg-secondary/5'} border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-all text-sm" id="practice-label-${qid}-${c.key}">
+        <input type="${inputType}" name="${inputName}" value="${c.key}" data-pracid="${q.id}" data-practice="1" class="peer mt-0.5 accent-secondary" onchange="onPracticeChange()" style="accent-color:#0058bb">
+        <span class="font-semibold text-on-surface-variant shrink-0 w-4">${c.key})</span>
+        <span>${c.text}</span>
+      </label>`;
+    });
+
+    html += `</div><div class="mt-3 hidden space-y-1 text-sm text-on-surface-variant" id="practice-rationale-${qid}"></div></div>`;
+  });
+
+  document.getElementById('practice-exam-questions-area').innerHTML = html;
+  renderPracticeExamNavGrid();
+  startPracticeExamTimer();
+}
+
+function renderPracticeExamNavGrid() {
+  const grid = document.getElementById('practice-exam-nav-grid');
+  if (!grid) return;
+  const qs = window._practiceQuizState.questions;
+  grid.innerHTML = qs.map((q, i) =>
+    `<button class="question-nav-btn w-8 h-8 rounded text-xs font-medium bg-surface-container-highest text-on-surface-variant border-none" id="practice-nav-${q.id}" data-idx="${i}" onclick="document.getElementById('practice-card-prac-q${q.id}')?.scrollIntoView({behavior:'smooth'})">${i+1}</button>`
+  ).join('');
+}
+
+function togglePracticeFlag(qId) {
+  const state = window._practiceQuizState;
+  if (state.flagged.has(qId)) state.flagged.delete(qId);
+  else state.flagged.add(qId);
+  const el = document.getElementById(`practice-flag-prac-q${qId}`);
+  if (el) {
+    el.style.fontVariationSettings = state.flagged.has(qId) ? "'FILL'1" : "'FILL'0";
+    el.style.color = state.flagged.has(qId) ? '#ba1a1a' : '';
+  }
+  const nav = document.getElementById(`practice-nav-${qId}`);
+  if (nav) {
+    if (state.flagged.has(qId)) {
+      nav.classList.add('bg-error', 'text-white');
+      nav.classList.remove('bg-surface-container-highest', 'bg-secondary-container');
+    } else {
+      nav.classList.remove('bg-error', 'text-white');
+      nav.classList.add('bg-surface-container-highest');
+    }
+  }
+}
+
+function onPracticeChange() {
+  const state = window._practiceQuizState;
+  if (state.submitted) return;
+  let answered = 0;
+  state.questions.forEach(q => {
+    const checked = document.querySelectorAll(`input[data-pracid="${q.id}"][data-practice="1"]:checked`).length;
+    if (checked > 0) {
+      answered++;
+      const nav = document.getElementById(`practice-nav-${q.id}`);
+      if (nav && !state.flagged.has(q.id)) {
+        nav.classList.remove('bg-surface-container-highest');
+        nav.classList.add('bg-secondary-container', 'text-on-secondary-container');
+      }
+    }
+  });
+  const countEl = document.getElementById('practice-exam-answered-count');
+  if (countEl) countEl.textContent = `${answered}/${state.questions.length}`;
+}
+
+let practiceExamTimerInterval = null;
+function startPracticeExamTimer() {
+  if (practiceExamTimerInterval) clearInterval(practiceExamTimerInterval);
+  let secs = 5400;
+  practiceExamTimerInterval = setInterval(() => {
+    secs--;
+    const m = Math.floor(secs/60), s = secs%60;
+    const timer = document.getElementById('practice-exam-timer');
+    if (timer) {
+      timer.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      if (secs <= 300) timer.className = 'text-[32px] font-bold text-error font-display';
+    }
+    const bar = document.getElementById('practice-exam-timer-bar');
+    if (bar) bar.style.width = `${(secs/5400)*100}%`;
+    if (secs <= 300 && bar) bar.className = 'h-full bg-error rounded-full';
+    if (secs <= 0) {
+      clearInterval(practiceExamTimerInterval);
+      practiceExamTimerInterval = null;
+      alert('⏰ Time is up! Submitting your exam...');
+      submitPracticeExam();
+    }
+  }, 1000);
+}
+
+function submitPracticeExam() {
+  const state = window._practiceQuizState;
+  if (state.submitted) return;
+  if (practiceExamTimerInterval) { clearInterval(practiceExamTimerInterval); practiceExamTimerInterval = null; }
+
+  const userAns = {};
+  let allAnswered = true;
+  state.questions.forEach(q => {
+    const keys = Array.from(document.querySelectorAll(`input[data-pracid="${q.id}"][data-practice="1"]:checked`)).map(i=>i.value);
+    userAns[q.id] = keys;
+    if (!keys.length) allAnswered = false;
+  });
+  if (!allAnswered && !confirm('⚠️ You have not answered all questions. Submit anyway?')) return;
+
+  state.submitted = true;
+  document.getElementById('btn-practice-exam-submit')?.remove();
+
+  let correct = 0, totalPts = 0, earned = 0;
+  const chapterStats = {};
+
+  state.questions.forEach(q => {
+    const ans = PRACTICE_ANSWERS_DATA[q.id];
+    if (!ans) return;
+    totalPts += q.points;
+    const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
+    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    const isCorrect = u.join(',') === c.join(',');
+    if (isCorrect) { correct++; earned += q.points; }
+
+    if (!chapterStats[q.chapter]) chapterStats[q.chapter] = { correct: 0, total: 0, points: 0, earned: 0 };
+    chapterStats[q.chapter].total++;
+    chapterStats[q.chapter].points += q.points;
+    if (isCorrect) {
+      chapterStats[q.chapter].correct++;
+      chapterStats[q.chapter].earned += q.points;
+    }
+
+    const qid = `prac-q${q.id}`;
+    const card = document.getElementById(`practice-card-${qid}`);
+    if (!card) return;
+    card.className = `rounded-xl p-5 mb-4 border-2 ${isCorrect ? 'border-success bg-success-container' : 'border-error bg-error-container'}`;
+
+    q.choices.forEach(choice => {
+      const label = document.getElementById(`practice-label-${qid}-${choice.key}`);
+      if (!label) return;
+      label.style.cursor = 'default';
+      const input = label.querySelector('input');
+      if (input) input.disabled = true;
+
+      const isUser = u.includes(choice.key);
+      const isRight = c.includes(choice.key);
+      const icon = document.createElement('span');
+      icon.className = 'result-icon ml-auto text-sm';
+      if (isRight && isUser) { icon.textContent = '✅'; label.style.borderColor = '#2e7d32'; label.style.background = '#e8f5e9'; }
+      else if (isRight && !isUser) { icon.textContent = '✅'; label.style.borderColor = '#2e7d32'; }
+      else if (!isRight && isUser) { icon.textContent = '❌'; label.style.borderColor = '#ba1a1a'; label.style.background = '#ffebee'; }
+      const existing = label.querySelector('.result-icon');
+      if (existing) existing.remove();
+      label.appendChild(icon);
+    });
+
+    showPracticeRationale(q, ans, u, c);
+  });
+
+  const pct = Math.round((earned/totalPts)*100);
+  const pass = pct >= 65;
+
+  const wrongIds = state.questions.filter(q => {
+    const ans = PRACTICE_ANSWERS_DATA[q.id];
+    if (!ans) return false;
+    const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
+    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    return u.join(',') !== c.join(',');
+  }).map(q => q.id);
+  savePracticeExamHistory({ correct, total: state.questions.length, pct, wrong: wrongIds, date: new Date().toISOString() });
+  const historyHtml = renderPracticeExamHistory();
+
+  const chBars = Object.keys(chapterStats).sort().map(ch => {
+    const s = chapterStats[ch];
+    const cPct = s.total > 0 ? Math.round((s.correct/s.total)*100) : 0;
+    return `<div class="flex items-center gap-3">
+      <span class="text-xs w-8 shrink-0 font-semibold">Ch ${ch}</span>
+      <div class="flex-1 h-2.5 bg-surface-container-high rounded-full overflow-hidden">
+        <div class="h-full rounded-full transition-all" style="width:${cPct}%;background:${cPct >= 65 ? '#2e7d32' : '#ba1a1a'}"></div>
+      </div>
+      <span class="text-xs font-medium w-16 text-right text-on-surface-variant">${s.correct}/${s.total}</span>
+    </div>`;
+  }).join('');
+
+  const barColor = pass ? '#2e7d32' : '#ba1a1a';
+  const barBg = pass ? '#ecfdf5' : '#fef2f2';
+  const border = pass ? '#bbf7d0' : '#fecaca';
+  const grad = pass ? 'from-green-50 to-emerald-50' : 'from-red-50 to-rose-50';
+  const summary = `<div class="rounded-xl mb-6 overflow-hidden border shadow-sm" style="border-color:${border}">
+    <div class="bg-gradient-to-r ${grad} px-6 py-5" style="border-bottom:1px solid ${border}">
+      <div class="flex flex-col md:flex-row gap-5 items-center">
+        <div class="text-center shrink-0">
+          <div class="relative inline-flex items-center justify-center w-24 h-24">
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="${barColor}" stroke-width="8" stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${(2*Math.PI*38) - (pct/100)*(2*Math.PI*38)}" stroke-linecap="round"/>
+            </svg>
+            <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold font-display" style="color:${barColor}">${pct}%</span>
+          </div>
+          <div class="flex items-center justify-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold" style="background:${barBg};color:${barColor};border:1px solid ${border}">${pass ? '✓ PASS' : '✗ FAIL'}</span>
+            <span class="text-xs" style="color:${barColor}">${correct}/${state.questions.length}</span>
+          </div>
+          <div class="mt-1.5 text-xs text-gray-500">Required: 65%</div>
+        </div>
+        <div class="flex-1 text-center md:text-left">
+          <h2 class="font-display text-xl font-bold" style="color:${barColor}">${pass ? '🎉 Congratulations!' : '📖 Keep studying!'}</h2>
+          <p class="text-gray-600 text-sm mt-1">You got <strong>${correct}/${state.questions.length}</strong> correct (${earned}/${totalPts} points)</p>
+          <div class="mt-3 space-y-1.5">${chBars}</div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white px-6 py-3 flex justify-center gap-3">
+      <button class="btn bg-secondary text-on-secondary px-5 py-2 rounded-lg font-bold scale-98-active text-sm" onclick="retryPracticeExam()">🔄 Retry Exam</button>
+      <button class="btn border-2 border-gray-200 text-gray-600 px-5 py-2 rounded-lg font-bold scale-98-active text-sm hover:bg-gray-50" onclick="navigate('home')">🏠 Dashboard</button>
+    </div>
+  </div>`;
+
+  document.getElementById('practice-exam-questions-area').insertAdjacentHTML('afterbegin', summary);
+  if (historyHtml) {
+    document.getElementById('practice-exam-questions-area').insertAdjacentHTML('beforeend', historyHtml);
+  }
+  var es = document.getElementById('practice-exam-sidebar');
+  if (es) es.style.display = 'none';
+}
+
+function showPracticeRationale(q, ans, userK, correctK) {
+  const qid = `prac-q${q.id}`;
+  const div = document.getElementById(`practice-rationale-${qid}`);
+  if (!div) return;
+  let html = '<div class="p-3 bg-surface-container rounded-lg space-y-1">';
+  if (ans.rationale && Object.keys(ans.rationale).length > 0) {
+    Object.entries(ans.rationale).forEach(function(e) {
+      var k = e[0], t = e[1];
+      var cls = correctK.includes(k) ? 'text-success font-medium' : (userK.includes(k) ? 'text-error font-medium' : '');
+      html += '<div class="' + cls + '"><strong>' + k + ')</strong> ' + t + '</div>';
+    });
+  } else {
+    html += '<p class="text-on-surface-variant italic text-xs">(No detailed explanation)</p>';
+  }
+  html += '</div>';
+  div.innerHTML = html;
+  div.classList.remove('hidden');
+}
+
+function retryPracticeExam() {
+  if (practiceExamTimerInterval) { clearInterval(practiceExamTimerInterval); practiceExamTimerInterval = null; }
+  window.location.hash = 'home';
+  setTimeout(function() { window.location.hash = 'practice-exam'; }, 50);
+}
+
+function getPracticeKLevel(qId) {
+  try {
+    var a = PRACTICE_ANSWERS_DATA[qId];
+    if (!a || !a.kLevel) return null;
+    var k = a.kLevel;
+    var names = {K1:'📖 Nhớ', K2:'📗 Hiểu', K3:'🔧 Áp dụng', K4:'📊 Phân tích'};
+    var colors = {K1:'#6b7280', K2:'#2563eb', K3:'#d97706', K4:'#7c3aed'};
+    return {level: k, name: names[k] || k, color: colors[k] || '#6b7280'};
+  } catch(e) { return null; }
+}
+
+// ===== PRACTICE EXAM HISTORY =====
+function getPracticeExamHistory() {
+  try {
+    const data = JSON.parse(localStorage.getItem('ctai_practice_exam_history') || '[]');
+    return data;
+  } catch(e) { return []; }
+}
+
+function savePracticeExamHistory(entry) {
+  try {
+    let data = getPracticeExamHistory();
+    data.push(entry);
+    if (data.length > 10) data = data.slice(-10);
+    localStorage.setItem('ctai_practice_exam_history', JSON.stringify(data));
+  } catch(e) { console.warn('Could not save practice exam history:', e); }
+}
+
+function renderPracticeExamHistory() {
+  const history = getPracticeExamHistory();
+  if (!history.length) return '';
+  let html = '<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 mb-4"><h3 class="text-sm font-semibold mb-2">📋 Exam Attempt History</h3><div class="space-y-1.5">';
+  history.slice().reverse().forEach(h => {
+    const d = new Date(h.date);
+    const ds = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const ws = h.wrong.length ? '❌ Q' + h.wrong.join(', Q') : '🎯 All correct!';
+    html += '<div class="flex items-center justify-between text-xs py-1.5 px-2 bg-surface-container rounded">'
+      + '<span class="text-on-surface-variant">' + ds + '</span>'
+      + '<span class="font-medium ' + (h.pct >= 65 ? 'text-success' : 'text-error') + '">' + h.correct + '/' + h.total + ' (' + h.pct + '%)</span>'
+      + '<span class="text-on-surface-variant">' + ws + '</span></div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
 // ===== EXAM HISTORY =====
 function getExamHistory() {
   try {
@@ -1422,6 +1806,8 @@ window.showQuickPractice = showQuickPractice;
 window.toggleBilingualPdf = toggleBilingualPdf;
 window.renderFullExam = renderFullExam; window.submitFullExam = submitFullExam; window.retryFullExam = retryFullExam;
 window.onExamChange = onExamChange; window.toggleExamFlag = toggleExamFlag;
+window.renderPracticeExam = renderPracticeExam; window.submitPracticeExam = submitPracticeExam; window.retryPracticeExam = retryPracticeExam;
+window.onPracticeChange = onPracticeChange; window.togglePracticeFlag = togglePracticeFlag;
 window.resumeLearning = resumeLearning;
 window.resetProgress = resetProgress;
 window.showCourseSelector = showCourseSelector;
