@@ -20,6 +20,19 @@ const COURSES = {
 function getCurrentCourse() { try { return localStorage.getItem('ctai_course'); } catch(e) { return null; } }
 function setCurrentCourse(id) { if (COURSES[id]) localStorage.setItem('ctai_course', id); }
 
+// P33 (A/B testing): the correct answer depends on how option C is worded.
+//   - option C = "...offered to the SAME users."          -> trap (not A/B testing)     -> correct = D
+//   - option C = "...offered to DIFFERENT SETS of users." -> correct definition (ISTQB) -> correct = C
+function getCorrectKeys(q, ans) {
+  if (q && q.id === 'P33' && ans) {
+    const optC = (q.choices || []).find(function (ch) { return String(ch.key).toLowerCase() === 'c'; });
+    const txt = (optC && optC.text) ? String(optC.text).toLowerCase() : '';
+    if (txt.indexOf('same users') !== -1) return ['d'];
+    if (txt.indexOf('different sets of users') !== -1) return ['c'];
+  }
+  return ans.correct;
+}
+
 // ===== PROGRESS TRACKING =====
 function trackChapterVisit(chapter) {
   if (!chapter) return;
@@ -850,7 +863,7 @@ function submitQuiz() {
     if (!ans) return;
     totalPts += q.points;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
-    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
     const isCorrect = u.join(',') === c.join(',');
     if (isCorrect) { correct++; earned += q.points; }
 
@@ -888,7 +901,7 @@ function submitQuiz() {
     const ans = ANSWERS_DATA[q.id];
     if (!ans) return false;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
-    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
     return u.join(',') !== c.join(',');
   }).map(q => q.id);
   saveQuizHistory(quizState.chapterNum, { correct, total: quizState.questions.length, pct, wrong: wrongIds, date: new Date().toISOString() });
@@ -1129,7 +1142,7 @@ function submitFullExam() {
     if (!ans) return;
     totalPts += q.points;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
-    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
     const isCorrect = u.join(',') === c.join(',');
     if (isCorrect) { correct++; earned += q.points; }
 
@@ -1176,7 +1189,7 @@ function submitFullExam() {
     const ans = ANSWERS_DATA[q.id];
     if (!ans) return false;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
-    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
     return u.join(',') !== c.join(',');
   }).map(q => q.id);
   saveExamHistory({ correct, total: quizState.questions.length, pct, wrong: wrongIds, date: new Date().toISOString() });
@@ -1436,7 +1449,7 @@ function submitPracticeExam() {
     if (!ans) return;
     totalPts += q.points;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
-    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
     const isCorrect = u.join(',') === c.join(',');
     if (isCorrect) { correct++; earned += q.points; }
 
@@ -1481,7 +1494,7 @@ function submitPracticeExam() {
     const ans = PRACTICE_ANSWERS_DATA[q.id];
     if (!ans) return false;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
-    const c = ans.correct.map(k=>k.trim().toLowerCase()).sort();
+    const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
     return u.join(',') !== c.join(',');
   }).map(q => q.id);
   savePracticeExamHistory({ correct, total: state.questions.length, pct, wrong: wrongIds, date: new Date().toISOString() });

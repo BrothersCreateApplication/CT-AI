@@ -1052,7 +1052,7 @@ Which ONE of the following describes A/B testing the MOST?
 - **c.** A performance comparison of two different ML models offered to the same users.
 - **d.** Evaluating two versions of a system from a user acceptance perspective.
 
-> **Đáp án hiện tại trong code: C** — LO: AI-6.1.9 — K2 (1 điểm)
+> **Đáp án hiện tại trong code: D** — LO: AI-6.1.9 — K2 (1 điểm)
 
 ---
 
