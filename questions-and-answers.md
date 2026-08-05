@@ -1053,6 +1053,8 @@ Which ONE of the following describes A/B testing the MOST?
 - **d.** Evaluating two versions of a system from a user acceptance perspective.
 
 > **Đáp án hiện tại trong code: D** — LO: AI-6.1.9 — K2 (1 điểm)
+**Giải thích hiện tại:**
+- **EXPLANATION:** This is a "trap" question about A/B testing. A/B testing requires splitting users into different groups (different consumers) and directing each group to a different version so their responses can be compared; the same users are never offered both versions at the same time. Option C says the two models are offered to the same users, so C is incorrect, and the correct answer is D (evaluating two versions of a system from a user acceptance perspective). If option C instead read offered to DIFFERENT SETS of users, the correct answer would be C.
 
 ---
 
