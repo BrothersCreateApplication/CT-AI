@@ -754,7 +754,7 @@ function renderQuiz(n) {
       </label>`;
     });
 
-    html += `</div><div class="mt-3 hidden space-y-1 text-sm text-on-surface-variant" id="rationale-${qid}"></div></div>`;
+    html += '</div></div>';
   });
 
   document.getElementById('quiz-questions-area').innerHTML = html;
@@ -878,7 +878,6 @@ function submitQuiz() {
       label.appendChild(icon);
     });
 
-    showRationale(q, ans, u, c);
   });
 
   const pct = Math.round((earned/totalPts)*100);
@@ -926,25 +925,6 @@ function submitQuiz() {
   }
   var qs = document.getElementById('quiz-sidebar');
   if (qs) qs.style.display = 'none';
-}
-
-function showRationale(q, ans, userK, correctK) {
-  const qid = `q${q.id}`;
-  const div = document.getElementById(`rationale-${qid}`);
-  if (!div) return;
-  let html = '<div class="p-3 bg-surface-container rounded-lg space-y-1">';
-  if (ans.rationale && Object.keys(ans.rationale).length > 0) {
-    Object.entries(ans.rationale).forEach(function(e) {
-      var k = e[0], t = e[1];
-      var cls = correctK.includes(k) ? 'text-success font-medium' : (userK.includes(k) ? 'text-error font-medium' : '');
-      html += '<div class="' + cls + '"><strong>' + k + ')</strong> ' + t + '</div>';
-    });
-  } else {
-    html += '<p class="text-on-surface-variant italic text-xs">(No detailed explanation available from official answer key)</p>';
-  }
-  html += '</div>';
-  div.innerHTML = html;
-  div.classList.remove('hidden');
 }
 
 function retryQuiz() {
@@ -1044,7 +1024,7 @@ function renderFullExam() {
       </label>`;
     });
 
-    html += `</div><div class="mt-3 hidden space-y-1 text-sm text-on-surface-variant" id="exam-rationale-${qid}"></div></div>`;
+    html += '</div></div>';
   });
 
   document.getElementById('exam-questions-area').innerHTML = html;
@@ -1186,7 +1166,6 @@ function submitFullExam() {
       label.appendChild(icon);
     });
 
-    showExamRationale(q, ans, u, c);
   });
 
   const pct = Math.round((earned/totalPts)*100);
@@ -1257,25 +1236,6 @@ function submitFullExam() {
   }
   var es = document.getElementById('exam-sidebar');
   if (es) es.style.display = 'none';
-}
-
-function showExamRationale(q, ans, userK, correctK) {
-  const qid = `exam-q${q.id}`;
-  const div = document.getElementById(`exam-rationale-${qid}`);
-  if (!div) return;
-  let html = '<div class="p-3 bg-surface-container rounded-lg space-y-1">';
-  if (ans.rationale && Object.keys(ans.rationale).length > 0) {
-    Object.entries(ans.rationale).forEach(function(e) {
-      var k = e[0], t = e[1];
-      var cls = correctK.includes(k) ? 'text-success font-medium' : (userK.includes(k) ? 'text-error font-medium' : '');
-      html += '<div class="' + cls + '"><strong>' + k + ')</strong> ' + t + '</div>';
-    });
-  } else {
-    html += '<p class="text-on-surface-variant italic text-xs">(No detailed explanation from official answer key)</p>';
-  }
-  html += '</div>';
-  div.innerHTML = html;
-  div.classList.remove('hidden');
 }
 
 function retryFullExam() {
@@ -1370,7 +1330,7 @@ function renderPracticeExam() {
       </label>`;
     });
 
-    html += `</div><div class="mt-3 hidden space-y-1 text-sm text-on-surface-variant" id="practice-rationale-${qid}"></div></div>`;
+    html += '</div></div>';
   });
 
   document.getElementById('practice-exam-questions-area').innerHTML = html;
@@ -1512,7 +1472,6 @@ function submitPracticeExam() {
       label.appendChild(icon);
     });
 
-    showPracticeRationale(q, ans, u, c);
   });
 
   const pct = Math.round((earned/totalPts)*100);
@@ -1580,25 +1539,6 @@ function submitPracticeExam() {
   }
   var es = document.getElementById('practice-exam-sidebar');
   if (es) es.style.display = 'none';
-}
-
-function showPracticeRationale(q, ans, userK, correctK) {
-  const qid = `prac-q${q.id}`;
-  const div = document.getElementById(`practice-rationale-${qid}`);
-  if (!div) return;
-  let html = '<div class="p-3 bg-surface-container rounded-lg space-y-1">';
-  if (ans.rationale && Object.keys(ans.rationale).length > 0) {
-    Object.entries(ans.rationale).forEach(function(e) {
-      var k = e[0], t = e[1];
-      var cls = correctK.includes(k) ? 'text-success font-medium' : (userK.includes(k) ? 'text-error font-medium' : '');
-      html += '<div class="' + cls + '"><strong>' + k + ')</strong> ' + t + '</div>';
-    });
-  } else {
-    html += '<p class="text-on-surface-variant italic text-xs">(No detailed explanation)</p>';
-  }
-  html += '</div>';
-  div.innerHTML = html;
-  div.classList.remove('hidden');
 }
 
 function retryPracticeExam() {
