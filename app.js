@@ -1269,7 +1269,10 @@ function renderPracticeExam() {
     return;
   }
 
-  window._practiceQuizState = { chapterNum: 'practice', questions: allQuestions, userAnswers: {}, submitted: false, score: null, flagged: new Set() };
+  const choicesMap = {};
+  allQuestions.forEach(q => { choicesMap[q.id] = q.choices.slice(); });
+  window._practiceQuizState = { chapterNum: 'practice', questions: allQuestions, userAnswers: {}, submitted: false, score: null, flagged: new Set(), shuffled: false, choicesMap: choicesMap };
+  const state = window._practiceQuizState;
 
   var sideBar = document.getElementById('practice-exam-sidebar');
   if (sideBar) sideBar.style.display = '';
@@ -1302,22 +1305,42 @@ function renderPracticeExam() {
     </div>
   `;
 
+  document.getElementById('practice-exam-questions-area').innerHTML = buildPracticeQuestionsHtml(state);
+  renderPracticeExamNavGrid();
+  startPracticeExamTimer();
+}
+
+// Build the practice-exam questions area HTML. Reads the display order of each
+// question's choices from state.choicesMap so answers can be shuffled while the
+// question order stays fixed.
+function buildPracticeQuestionsHtml(state) {
+  const allQuestions = state.questions;
   const chCounts = {};
   allQuestions.forEach(q => { chCounts[q.chapter] = (chCounts[q.chapter] || 0) + 1; });
   const chLabels = Object.keys(chCounts).sort().map(ch =>
     `<span class="text-xs px-2 py-0.5 bg-surface-container rounded-full">Ch ${ch}: ${chCounts[ch]}</span>`
   ).join('');
 
+  const orderBadge = state.shuffled
+    ? '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full" style="background:#f3e8ff;color:#7c3aed">🔀 Đáp án đã tráo</span>'
+    : '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full" style="background:#eceef0;color:#44474d">📄 Đề gốc</span>';
+
   let html = `<div class="mb-4">
     <h1 class="font-display text-headline-lg" style="color:#7c3aed">🎯 Bộ đề thi thử</h1>
     <p class="text-on-surface-variant text-body-md">${allQuestions.length} câu hỏi · 90 phút · Đạt: 65%</p>
     <div class="flex flex-wrap gap-1.5 mt-2">${chLabels}</div>
+    <div class="flex flex-wrap items-center gap-2 mt-3">
+      <button id="btn-practice-shuffle" class="btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold transition-all scale-98-active" style="${state.shuffled ? 'background:#eceef0;color:#7c3aed;border:2px solid #7c3aed' : 'background:#7c3aed;color:#fff;border:2px solid #7c3aed'}" onclick="shufflePracticeAnswers()">🔀 Tráo đáp án</button>
+      <button id="btn-practice-original" class="btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold transition-all scale-98-active" style="${state.shuffled ? 'background:#fff;color:#7c3aed;border:2px solid #7c3aed' : 'background:#eceef0;color:#44474d;border:2px solid #eceef0'}" onclick="restorePracticeOriginal()">📄 Đề gốc</button>
+      ${orderBadge}
+    </div>
   </div>
   ${renderPracticeExamHistory()}`;
 
   allQuestions.forEach((q, idx) => {
     const qid = `prac-q${q.id}`;
     const inputType = q.selectType === 'multiple' ? 'checkbox' : 'radio';
+    const displayChoices = (state.choicesMap && state.choicesMap[q.id]) ? state.choicesMap[q.id] : q.choices;
 
     var kInfo = getPracticeKLevel(q.id);
     html += `<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 mb-4" id="practice-card-${qid}">
@@ -1334,7 +1357,7 @@ function renderPracticeExam() {
       ${q.selectType === 'multiple' ? `<div class="text-xs text-on-surface-variant italic mb-2">Select ${q.selectCount} answers</div>` : ''}
       <div class="space-y-2">`;
 
-    q.choices.forEach(c => {
+    displayChoices.forEach(c => {
       const inputName = inputType === 'checkbox' ? `prac-q${q.id}-${c.key}` : `prac-q${q.id}`;
       html += `<label class="option-card flex items-start gap-3 p-3 border ${inputType==='checkbox'?'':'has-[:checked]:border-2 has-[:checked]:border-secondary has-[:checked]:bg-secondary/5'} border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-all text-sm" id="practice-label-${qid}-${c.key}">
         <input type="${inputType}" name="${inputName}" value="${c.key}" data-pracid="${q.id}" data-practice="1" class="peer mt-0.5 accent-secondary" onchange="onPracticeChange()" style="accent-color:#0058bb">
@@ -1346,9 +1369,96 @@ function renderPracticeExam() {
     html += '</div></div>';
   });
 
-  document.getElementById('practice-exam-questions-area').innerHTML = html;
-  renderPracticeExamNavGrid();
-  startPracticeExamTimer();
+  return html;
+}
+
+// Shuffle each question's answer choices (question order stays the same).
+function shufflePracticeAnswers() {
+  const state = window._practiceQuizState;
+  if (!state || state.submitted) return;
+  const saved = capturePracticeAnswers(state);
+  state.shuffled = true;
+  state.questions.forEach(function(q) {
+    const orig = q.choices;
+    let order = orig.slice();
+    if (order.length > 1) {
+      let guard = 0;
+      do {
+        for (let i = order.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const t = order[i]; order[i] = order[j]; order[j] = t;
+        }
+        guard++;
+      } while (practiceChoicesEqual(order, orig) && guard < 20);
+    }
+    state.choicesMap[q.id] = order;
+  });
+  renderPracticeQuestionsArea();
+  restorePracticeAnswers(state, saved);
+}
+
+// Restore the original (un-shuffled) answer order.
+function restorePracticeOriginal() {
+  const state = window._practiceQuizState;
+  if (!state || state.submitted) return;
+  const saved = capturePracticeAnswers(state);
+  state.shuffled = false;
+  state.questions.forEach(function(q) {
+    state.choicesMap[q.id] = q.choices.slice();
+  });
+  renderPracticeQuestionsArea();
+  restorePracticeAnswers(state, saved);
+}
+
+function practiceChoicesEqual(a, b) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i].key !== b[i].key) return false;
+  return true;
+}
+
+// Snapshot the currently-checked answers (by question id) so they survive a
+// re-render of the questions area.
+function capturePracticeAnswers(state) {
+  const ans = {};
+  state.questions.forEach(function(q) {
+    const checked = document.querySelectorAll('input[data-pracid="' + q.id + '"][data-practice="1"]:checked');
+    const keys = [];
+    for (let i = 0; i < checked.length; i++) keys.push(checked[i].value);
+    ans[q.id] = keys;
+  });
+  return ans;
+}
+
+function restorePracticeAnswers(state, ans) {
+  if (!ans) return;
+  state.questions.forEach(function(q) {
+    (ans[q.id] || []).forEach(function(k) {
+      const input = document.querySelector('input[data-pracid="' + q.id + '"][data-practice="1"][value="' + k + '"]');
+      if (input) input.checked = true;
+    });
+  });
+  onPracticeChange();
+}
+
+function renderPracticeQuestionsArea() {
+  const state = window._practiceQuizState;
+  if (!state) return;
+  document.getElementById('practice-exam-questions-area').innerHTML = buildPracticeQuestionsHtml(state);
+  reapplyPracticeFlags(state);
+}
+
+// Restore flag icons / nav highlights after the questions area is re-rendered.
+function reapplyPracticeFlags(state) {
+  if (!state || !state.flagged) return;
+  state.flagged.forEach(function(qId) {
+    const el = document.getElementById('practice-flag-prac-' + qId);
+    if (el) { el.style.fontVariationSettings = "'FILL'1"; el.style.color = '#ba1a1a'; }
+    const nav = document.getElementById('practice-nav-' + qId);
+    if (nav) {
+      nav.classList.add('bg-error', 'text-white');
+      nav.classList.remove('bg-surface-container-highest', 'bg-secondary-container');
+    }
+  });
 }
 
 function renderPracticeExamNavGrid() {
@@ -1761,6 +1871,7 @@ window.renderFullExam = renderFullExam; window.submitFullExam = submitFullExam; 
 window.onExamChange = onExamChange; window.toggleExamFlag = toggleExamFlag;
 window.renderPracticeExam = renderPracticeExam; window.submitPracticeExam = submitPracticeExam; window.retryPracticeExam = retryPracticeExam;
 window.onPracticeChange = onPracticeChange; window.togglePracticeFlag = togglePracticeFlag;
+window.shufflePracticeAnswers = shufflePracticeAnswers; window.restorePracticeOriginal = restorePracticeOriginal;
 window.resumeLearning = resumeLearning;
 window.resetProgress = resetProgress;
 window.showCourseSelector = showCourseSelector;
