@@ -7,7 +7,7 @@
   'use strict';
 
   var USER = 'admin';
-  var PASS_HASH = 'e7a4c2e188dbfbc41433fd9b58d99145b6d3f693b637218bf9ad718dbf1a1c59'; // sha256("GHC123456")
+  var PASS_HASH = 'e7a4c2e188dbfbc41433fd9b58d99145b6d3f693b637218bf9ad718dbf1a1c59'; // sha256 of the login password
   var AUTH_KEY = 'ctai_auth';
   var LOCK_ATTR = 'data-locked';
 
