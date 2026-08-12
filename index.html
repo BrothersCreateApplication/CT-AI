@@ -70,7 +70,40 @@ code { font-family: 'JetBrains Mono', monospace; }
 .pdf-text-layer .endOfContent { height: 0; }
 </style>
 </head>
-<body class="bg-surface text-on-surface font-body min-h-screen">
+<body class="bg-surface text-on-surface font-body min-h-screen" data-locked>
+<!-- ===== LOGIN GATE ===== -->
+<style>
+#login-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#0f172a 0%,#0a1628 55%,#020617 100%);overflow-y:auto;font-family:Inter,system-ui,sans-serif}
+body[data-locked]>*:not(#login-screen){visibility:hidden}
+body[data-locked]{overflow:hidden}
+.login-card{width:100%;max-width:400px;background:#ffffff;border-radius:16px;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,0.45);text-align:center;visibility:visible}
+.login-logo{height:48px;margin-bottom:14px}
+.login-title{font-size:24px;font-weight:700;color:#111827;margin:0 0 4px;letter-spacing:-0.02em}
+.login-title span{color:#0058bb}
+.login-sub{font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.5}
+.login-field{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;margin-bottom:14px;outline:none;transition:border-color .15s,box-shadow .15s}
+.login-field:focus{border-color:#0058bb;box-shadow:0 0 0 3px rgba(0,88,187,.15)}
+.login-btn{width:100%;padding:13px;border:none;border-radius:10px;background:#0058bb;color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s}
+.login-btn:hover{background:#004a9e}
+.login-btn:disabled{opacity:.6;cursor:default}
+.login-error{display:none;background:#ffdad6;color:#93000a;border:1px solid #f5b5ad;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;text-align:left}
+.login-hint{font-size:12px;color:#9ca3af;margin:18px 0 0}
+</style>
+<div id="login-screen" role="dialog" aria-label="Login">
+  <div class="login-card">
+    <img class="login-logo" src="https://upload.wikimedia.org/wikipedia/commons/1/11/FPT_logo_2010.svg" alt="FPT" onerror="this.style.display='none'">
+    <h1 class="login-title">GHC.GHS · CT-AI <span>Academy</span></h1>
+    <p class="login-sub">Vui lòng đăng nhập để truy cập hệ thống ôn thi</p>
+    <div id="login-error" class="login-error"></div>
+    <form id="login-form" autocomplete="off">
+      <input id="login-user" class="login-field" type="text" placeholder="Tài khoản" autocomplete="username" required>
+      <input id="login-pass" class="login-field" type="password" placeholder="Mật khẩu" autocomplete="current-password" required>
+      <button id="login-btn" class="login-btn" type="submit">Đăng nhập</button>
+    </form>
+    <p class="login-hint">Hệ thống chỉ dành cho nội bộ GHC.GHS</p>
+  </div>
+</div>
+
 <!-- ===== TOP NAV ===== -->
 <header class="fixed top-0 left-0 right-0 z-50 h-16 bg-surface-container-lowest border-b border-outline-variant">
   <div class="flex items-center justify-between h-full max-w-container-max mx-auto px-gutter">
@@ -95,6 +128,10 @@ code { font-family: 'JetBrains Mono', monospace; }
         <span class="material-symbols-outlined absolute left-3 text-on-surface-variant pointer-events-none" style="font-size:20px;">search</span>
         <input type="text" id="search-input" placeholder="Search..." class="w-48 pl-9 pr-3 py-1.5 text-sm bg-surface-container-low border border-outline-variant rounded focus:border-secondary focus:bg-surface-container-lowest focus:outline-none transition-all"/>
       </div>
+      <button id="btn-logout" class="btn flex items-center gap-1 text-label-md font-label text-on-surface-variant hover:text-secondary px-2 py-1.5 rounded scale-98-active" onclick="logout()" title="Đăng xuất">
+        <span class="material-symbols-outlined" style="font-size:20px;">logout</span>
+        <span class="hidden md:inline">Logout</span>
+      </button>
     </div>
   </div>
 </header>
@@ -287,5 +324,6 @@ code { font-family: 'JetBrains Mono', monospace; }
 </div>
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script src="auth.js"></script>
 </body>
 </html>
