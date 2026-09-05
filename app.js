@@ -9,6 +9,12 @@ const COURSES = {
     icon:'🤖', color:'#0058bb', gradient:'from-blue-600 to-indigo-700', chapters:7, questions:43,
     img:'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=400&fit=crop&auto=format'
   },
+  'ct-fl': {
+    id:'ct-fl', title:'CTFL Foundation', short:'CTFL', subtitle:'Certified Tester Foundation Level',
+    desc:'Master core software testing with ISTQB\'s official CTFL 4.0.1 syllabus. Covers test fundamentals, design techniques, risk, and test management.',
+    icon:'📘', color:'#0d9488', gradient:'from-teal-600 to-emerald-700', chapters:6, questions:40,
+    img:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=400&fit=crop&auto=format'
+  },
   'ct-genai': {
     id:'ct-genai', title:'CT-GenAI Foundation', short:'GenAI', subtitle:'Testing with Generative AI',
     desc:'Learn to test GenAI systems, LLMs, prompt engineering, and AI-powered applications.',
@@ -19,6 +25,69 @@ const COURSES = {
 };
 function getCurrentCourse() { try { return localStorage.getItem('ctai_course'); } catch(e) { return null; } }
 function setCurrentCourse(id) { if (COURSES[id]) localStorage.setItem('ctai_course', id); }
+
+// ===== PER-COURSE DATA, PROFILES & STORAGE =====
+// Every data array is resolved lazily (per call) so referencing a course whose
+// data file is not (yet) loaded can never break another course.
+function currentCourseId() {
+  var c = getCurrentCourse();
+  return (c && COURSES[c]) ? c : 'ct-ai';
+}
+function COURSE_DATA() {
+  if (currentCourseId() === 'ct-fl') {
+    return {
+      syllabus: typeof CTFL_SYLLABUS_DATA !== 'undefined' ? CTFL_SYLLABUS_DATA : [],
+      questions: typeof CTFL_QUESTIONS_DATA !== 'undefined' ? CTFL_QUESTIONS_DATA : [],
+      answers: typeof CTFL_ANSWERS_DATA !== 'undefined' ? CTFL_ANSWERS_DATA : {},
+      practiceQuestions: typeof CTFL_PRACTICE_QUESTIONS_DATA !== 'undefined' ? CTFL_PRACTICE_QUESTIONS_DATA : [],
+      practiceAnswers: typeof CTFL_PRACTICE_ANSWERS_DATA !== 'undefined' ? CTFL_PRACTICE_ANSWERS_DATA : {}
+    };
+  }
+  return { syllabus: SYLLABUS_DATA, questions: QUESTIONS_DATA, answers: ANSWERS_DATA, practiceQuestions: PRACTICE_QUESTIONS_DATA, practiceAnswers: PRACTICE_ANSWERS_DATA };
+}
+function S()  { return COURSE_DATA().syllabus; }
+function Qs() { return COURSE_DATA().questions; }
+function As() { return COURSE_DATA().answers; }
+function PQs(){ return COURSE_DATA().practiceQuestions || []; }
+function PAs(){ return COURSE_DATA().practiceAnswers || {}; }
+
+// Course-scoped localStorage keys (CT-AI keeps its legacy bare keys).
+function courseSuffix() { return currentCourseId() === 'ct-ai' ? '' : '_' + currentCourseId(); }
+function visitsKey()          { return 'ctai_chapter_visits' + courseSuffix(); }
+function lastChapterKey()     { return 'ctai_last_chapter' + courseSuffix(); }
+function quizHistoryKey()     { return 'ctai_quiz_history' + courseSuffix(); }
+function examHistoryKey()     { return 'ctai_exam_history' + courseSuffix(); }
+function practiceHistoryKey() { return 'ctai_practice_exam_history' + courseSuffix(); }
+
+// Per-course UI metadata (chapter icons, study minutes, syllabus PDF page map,
+// version, exam length). Defaults mirror CT-AI exactly.
+const COURSE_PROFILES = {
+  'ct-ai': {
+    version: 'v2.0',
+    examMinutes: 90,
+    syllabusPdf: '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf',
+    pageMap: {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63},
+    durations: {1:'120 min',2:'45 min',3:'375 min',4:'195 min',5:'180 min',6:'225 min',7:'30 min'},
+    sidebarIcons: ['info','psychology','biotech','quiz','database','model_training','deployed_code'],
+    emoji: ['🧠','✨','🤖','🔍','💾','🧪','⚡']
+  },
+  'ct-fl': {
+    version: 'v4.0.1',
+    examMinutes: 60,
+    syllabusPdf: '/ISQTB%20Foundation/ISTQB_CTFL_Syllabus_v4.0.1.pdf',
+    pageMap: {1:14, 2:24, 3:32, 4:38, 5:47, 6:58},
+    durations: {1:'180 min',2:'130 min',3:'80 min',4:'390 min',5:'335 min',6:'20 min'},
+    sidebarIcons: ['explore','sync_alt','menu_book','science','task_alt','handyman'],
+    emoji: ['🧭','🔄','📖','🧪','📋','🧰']
+  }
+};
+function profile() { return COURSE_PROFILES[currentCourseId()] || COURSE_PROFILES['ct-ai']; }
+function examMinutes() { return profile().examMinutes || 90; }
+
+function summaryFor(n) {
+  // Only CT-AI has authored chapter summaries so far; others return none.
+  return currentCourseId() === 'ct-ai' ? (CHAPTER_SUMMARIES[n] || null) : null;
+}
 
 // P33 (A/B testing): the correct answer depends on how option C is worded.
 //   - option C = "...offered to the SAME users."          -> trap (not A/B testing)     -> correct = D
@@ -37,24 +106,24 @@ function getCorrectKeys(q, ans) {
 function trackChapterVisit(chapter) {
   if (!chapter) return;
   try {
-    const visits = JSON.parse(localStorage.getItem('ctai_chapter_visits') || '[]');
+    const visits = JSON.parse(localStorage.getItem(visitsKey()) || '[]');
     if (!visits.includes(chapter)) visits.push(chapter);
-    localStorage.setItem('ctai_chapter_visits', JSON.stringify(visits));
-    localStorage.setItem('ctai_last_chapter', String(chapter));
+    localStorage.setItem(visitsKey(), JSON.stringify(visits));
+    localStorage.setItem(lastChapterKey(), String(chapter));
   } catch(e) { /* ignore */ }
 }
 
 function getLastVisitedChapter() {
-  try { return parseInt(localStorage.getItem('ctai_last_chapter')) || 1; } catch(e) { return 1; }
+  try { return parseInt(localStorage.getItem(lastChapterKey())) || 1; } catch(e) { return 1; }
 }
 
 function getVisitedChapters() {
-  try { return JSON.parse(localStorage.getItem('ctai_chapter_visits') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(localStorage.getItem(visitsKey()) || '[]'); } catch(e) { return []; }
 }
 
 function getStudyProgress() {
   const visited = getVisitedChapters();
-  const total = SYLLABUS_DATA.length;
+  const total = S().length;
   return { visited: visited.length, total, pct: total > 0 ? Math.round((visited.length / total) * 100) : 0 };
 }
 
@@ -373,10 +442,10 @@ const CHAPTER_SUMMARIES = {
 
 function resetProgress() {
   if (confirm('Reset all study progress? This will clear visited chapters, quiz history, and exam attempts.')) {
-    localStorage.removeItem('ctai_chapter_visits');
-    localStorage.removeItem('ctai_last_chapter');
-    localStorage.removeItem('ctai_quiz_history');
-    localStorage.removeItem('ctai_exam_history');
+    localStorage.removeItem(visitsKey());
+    localStorage.removeItem(lastChapterKey());
+    localStorage.removeItem(quizHistoryKey());
+    localStorage.removeItem(examHistoryKey());
     renderHomePage();
   }
 }
@@ -459,11 +528,11 @@ function buildSidebar() {
       var titleEl = document.getElementById('sidebar-title');
       var subEl = document.getElementById('sidebar-sub');
       if (titleEl) titleEl.textContent = course.title;
-      if (subEl) subEl.textContent = course.subtitle + ' · Syllabus v2.0';
+      if (subEl) subEl.textContent = course.subtitle + ' · Syllabus ' + profile().version;
     }
     // Build chapter list
-    const icons = ['info','psychology','biotech','quiz','database','model_training','deployed_code'];
-    document.getElementById('chapter-list').innerHTML = SYLLABUS_DATA.map(ch =>
+    const icons = profile().sidebarIcons;
+    document.getElementById('chapter-list').innerHTML = S().map(ch =>
     `<a href="#chapter-${ch.chapter}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant text-sm font-medium no-underline border-l-[3px] border-transparent" data-chapter="${ch.chapter}">
       <span class="material-symbols-outlined text-secondary/70" style="font-size:20px;">${icons[ch.chapter-1]||'article'}</span>
       <span>Ch ${ch.chapter}: ${ch.title}</span>
@@ -530,9 +599,9 @@ function renderHomePage() {
   ];
   var chColors = ['#4f46e5','#059669','#2563eb','#0284c7','#7c3aed','#db2777','#0d9488'];
   var chGrid = '<div class="col-span-12"><div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
-  SYLLABUS_DATA.forEach(function(ch) {
+  S().forEach(function(ch) {
     const idx = ch.chapter - 1;
-    const qs = QUESTIONS_DATA.filter(function(q) { return q.chapter === ch.chapter; }).length;
+    const qs = Qs().filter(function(q) { return q.chapter === ch.chapter; }).length;
     var col = chColors[idx];
     chGrid += '<div class="cursor-pointer group" onclick="navigate(\'chapter-' + ch.chapter + '\')">'
       + '<div class="rounded-xl overflow-hidden border border-outline-variant hover:shadow transition-all duration-200">'
@@ -553,9 +622,9 @@ function renderHomePage() {
   grid.innerHTML = chGrid;
 
   const fullExamCountEl = document.getElementById('full-exam-count');
-  if (fullExamCountEl) fullExamCountEl.textContent = QUESTIONS_DATA.length;
+  if (fullExamCountEl) fullExamCountEl.textContent = Qs().length;
   const practiceExamCountEl = document.getElementById('practice-exam-count');
-  if (practiceExamCountEl && typeof PRACTICE_QUESTIONS_DATA !== 'undefined') practiceExamCountEl.textContent = PRACTICE_QUESTIONS_DATA.length;
+  if (practiceExamCountEl) practiceExamCountEl.textContent = PQs().length;
 
   // Progress ring + resume button
   const prog = getStudyProgress();
@@ -571,34 +640,48 @@ function renderHomePage() {
   if (btnResume) {
     btnResume.onclick = resumeLearning;
     const lastCh = getLastVisitedChapter();
-    const chTitle = SYLLABUS_DATA.find(c => c.chapter === lastCh)?.title || '';
+    const chTitle = S().find(c => c.chapter === lastCh)?.title || '';
     btnResume.innerHTML = 'Ch.' + lastCh + ' <span class="text-xs font-normal opacity-70">' + (chTitle.length > 35 ? chTitle.slice(0,35)+'…' : chTitle) + '</span> <span class="material-symbols-outlined text-[18px]">arrow_forward</span>';
   }
   // Stats
   const visited = getVisitedChapters();
   const completedEl = document.getElementById('completed-chapters');
-  if (completedEl) completedEl.textContent = visited.length + '/' + SYLLABUS_DATA.length;
+  if (completedEl) completedEl.textContent = visited.length + '/' + S().length;
   let totalQuizzes = 0;
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= S().length; i++) {
     try {
-      const h = JSON.parse(localStorage.getItem('ctai_quiz_history') || '{}');
+      const h = JSON.parse(localStorage.getItem(quizHistoryKey()) || '{}');
       totalQuizzes += (h['ch' + i] || []).length;
     } catch(e) {}
   }
   const quizEl = document.getElementById('quiz-attempts');
   if (quizEl) quizEl.textContent = totalQuizzes;
+
+  // Course-aware hero + exam-card labels
+  var courseObj = COURSES[currentCourseId()];
+  var prof = profile();
+  var heroT = document.getElementById('home-hero-title');
+  if (heroT && courseObj) heroT.textContent = courseObj.title;
+  var heroS = document.getElementById('home-hero-sub');
+  if (heroS && courseObj) heroS.textContent = courseObj.subtitle + ' · Study Platform';
+  var heroB = document.getElementById('home-hero-badge');
+  if (heroB && courseObj) heroB.textContent = '📚 ' + courseObj.short + ' Foundation ' + prof.version;
+  var fullMeta = document.getElementById('full-exam-meta');
+  if (fullMeta) fullMeta.textContent = S().length + ' chapters · ' + examMinutes() + ' min';
+  var footP = document.getElementById('footer-platform');
+  if (footP && courseObj) footP.textContent = courseObj.title + ' Study Platform';
 }
 
-function getDuration(c) { return ({1:'120 min',2:'45 min',3:'375 min',4:'195 min',5:'180 min',6:'225 min',7:'30 min'})[c]||''; }
+function getDuration(c) { return (profile().durations || {})[c] || ''; }
 
 // ===== CHAPTER =====
 function renderChapter(n) {
-  const ch = SYLLABUS_DATA.find(c => c.chapter === n);
+  const ch = S().find(c => c.chapter === n);
   if (!ch) { document.getElementById('chapter-content').innerHTML = '<p class="text-on-surface-variant">Chapter not found.</p>'; return; }
-  const qs = QUESTIONS_DATA.filter(q => q.chapter === n).length;
-  const pageMap = {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63};
+  const qs = Qs().filter(q => q.chapter === n).length;
+  const pageMap = profile().pageMap;
 
-  var icons = ['🧠','✨','🤖','🔍','💾','🧪','⚡'];
+  var icons = profile().emoji;
   var chImgs = [
     'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80',
     'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
@@ -637,7 +720,7 @@ function renderChapter(n) {
       + '</summary>'
       + '<div class="px-4 pb-3 pt-1"><ul class="space-y-1">';
     ch.learningObjectives.forEach(lo => {
-      const m = lo.match(/^(AI-\S+)\s+(\(K\d\))\s+(.+)/);
+      const m = lo.match(/^((?:AI|FL)-\S+)\s+(\(K\d\))\s+(.+)/);
       html += '<li class="text-sm text-on-surface-variant">' + (m ? '<span class="font-semibold text-on-surface">' + m[1] + '</span> ' + m[3] + ' <em class="text-xs text-amber-700">' + m[2] + '</em>' : lo) + '</li>';
     });
     html += '</ul></div></details>';
@@ -648,12 +731,12 @@ function renderChapter(n) {
     + '<h3 class="font-semibold mb-4">📖 Study Content</h3>'
     + '<p class="text-sm text-on-surface-variant mb-5">Open the syllabus PDF to read with original formatting, images, and tables.</p>'
     + '<div class="flex justify-center gap-4 flex-wrap">'
-    + '<a class="btn inline-flex items-center bg-secondary text-on-secondary px-6 py-3 rounded-lg font-bold scale-98-active no-underline" href="/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?ch=' + n + '#page=' + (pageMap[n] || 13) + '" target="_blank" rel="noopener noreferrer" onclick="this.href=this.href.split(\'&\')[0]+\'&\'+Date.now()+\'#\'+this.href.split(\'#\')[1]">📘 Học với English</a>'
-    + '<a class="btn inline-flex items-center border-2 border-secondary text-secondary px-6 py-3 rounded-lg font-bold hover:bg-secondary hover:text-on-secondary transition-all scale-98-active no-underline" href="songngu.html?ch=' + n + '&page=1" target="_blank" rel="noopener noreferrer">📖 Học với Song ngữ</a>'
+    + '<a class="btn inline-flex items-center bg-secondary text-on-secondary px-6 py-3 rounded-lg font-bold scale-98-active no-underline" href="' + profile().syllabusPdf + '?ch=' + n + '#page=' + (pageMap[n] || 14) + '" target="_blank" rel="noopener noreferrer" onclick="this.href=this.href.split(\'&\')[0]+\'&\'+Date.now()+\'#\'+this.href.split(\'#\')[1]">📘 Học với English</a>'
+    + '<a class="btn inline-flex items-center border-2 border-secondary text-secondary px-6 py-3 rounded-lg font-bold hover:bg-secondary hover:text-on-secondary transition-all scale-98-active no-underline" href="songngu.html?ch=' + n + '&page=1&course=' + currentCourseId() + '" target="_blank" rel="noopener noreferrer">📖 Học với Song ngữ</a>'
     + '</div></div>';
 
   // Chapter summary (if available)
-  var summaries = CHAPTER_SUMMARIES[n];
+  var summaries = summaryFor(n);
   if (summaries) {
     html += '<details open class="bg-blue-50 border border-blue-200 rounded-lg mb-5 overflow-hidden">'
       + '<summary class="text-sm font-semibold text-blue-800 px-4 py-3 cursor-pointer hover:bg-blue-100/50 transition-colors select-none flex items-center gap-2">'
@@ -673,12 +756,12 @@ function renderChapter(n) {
 
 // ===== BILINGUAL =====
 function toggleBilingualPdf(ch) {
-  window.open('songngu.html?ch=' + ch + '&page=1', '_blank');
+  window.open('songngu.html?ch=' + ch + '&page=1&course=' + currentCourseId(), '_blank');
 }
 
 function getKLevel(qId) {
   try {
-    var a = ANSWERS_DATA[qId];
+    var a = As()[qId];
     if (!a || !a.kLevel) return null;
     var k = a.kLevel;
     var names = {K1:'📖 Nhớ', K2:'📗 Hiểu', K3:'🔧 Áp dụng', K4:'📊 Phân tích'};
@@ -692,7 +775,7 @@ let quizState = {};
 
 function renderQuiz(n) {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  const questions = QUESTIONS_DATA.filter(q => q.chapter === n);
+  const questions = Qs().filter(q => q.chapter === n);
   if (!questions.length) {
     document.getElementById('quiz-questions-area').innerHTML = '<p class="text-on-surface-variant">No questions.</p>';
     document.getElementById('quiz-sidebar').innerHTML = '';
@@ -859,7 +942,7 @@ function submitQuiz() {
   let correct = 0, totalPts = 0, earned = 0;
 
   quizState.questions.forEach(q => {
-    const ans = ANSWERS_DATA[q.id];
+    const ans = As()[q.id];
     if (!ans) return;
     totalPts += q.points;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
@@ -898,7 +981,7 @@ function submitQuiz() {
 
   // Save quiz history
   const wrongIds = quizState.questions.filter(q => {
-    const ans = ANSWERS_DATA[q.id];
+    const ans = As()[q.id];
     if (!ans) return false;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
     const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
@@ -953,7 +1036,7 @@ function retryQuiz() {
 // ===== FULL EXAM =====
 function renderFullExam() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  const allQuestions = QUESTIONS_DATA;
+  const allQuestions = Qs();
 
   if (!allQuestions.length) {
     document.getElementById('exam-questions-area').innerHTML = '<p class="text-on-surface-variant">No questions available.</p>';
@@ -971,7 +1054,7 @@ function renderFullExam() {
     <div class="sticky top-24 bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
       <div class="text-center mb-4">
         <p class="text-caption font-caption text-on-surface-variant tracking-wider uppercase">Time Remaining</p>
-        <p class="text-[32px] font-bold text-secondary font-display" id="exam-timer">90:00</p>
+        <p class="text-[32px] font-bold text-secondary font-display" id="exam-timer">${String(examMinutes()).padStart(2,'0')}:00</p>
         <div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden mt-2">
           <div class="h-full bg-secondary rounded-full" id="exam-timer-bar" style="width:100%"></div>
         </div>
@@ -991,7 +1074,7 @@ function renderFullExam() {
         <span class="flex items-center gap-1"><span class="px-1 rounded text-[10px] font-bold" style="background:#d9770620;color:#d97706">K3</span> Áp dụng</span>
       </div>
       <button class="btn w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold mt-4 scale-98-active" id="btn-exam-submit" onclick="submitFullExam()">Submit Exam</button>
-      <p class="text-caption font-caption text-on-surface-variant text-center mt-2">7 chương · ${allQuestions.length} câu hỏi</p>
+      <p class="text-caption font-caption text-on-surface-variant text-center mt-2">${S().length} chương · ${allQuestions.length} câu hỏi</p>
     </div>
   `;
 
@@ -1004,7 +1087,7 @@ function renderFullExam() {
 
   let html = `<div class="mb-4">
     <h1 class="font-display text-headline-lg text-primary">📋 Bộ đề ôn tập syllabus</h1>
-    <p class="text-on-surface-variant text-body-md">${allQuestions.length} câu hỏi · 7 chương · 90 phút · Đạt: 65%</p>
+    <p class="text-on-surface-variant text-body-md">${allQuestions.length} câu hỏi · ${S().length} chương · ${examMinutes()} phút · Đạt: 65%</p>
     <div class="flex flex-wrap gap-1.5 mt-2">${chLabels}</div>
   </div>
   ${renderExamHistory()}`;
@@ -1097,7 +1180,8 @@ function onExamChange() {
 let examTimerInterval = null;
 function startExamTimer() {
   if (examTimerInterval) clearInterval(examTimerInterval);
-  let secs = 5400; // 90 minutes
+  const examTotalSecs = examMinutes() * 60;
+  let secs = examTotalSecs;
   examTimerInterval = setInterval(() => {
     secs--;
     const m = Math.floor(secs/60), s = secs%60;
@@ -1107,7 +1191,7 @@ function startExamTimer() {
       if (secs <= 300) { timer.className = 'text-[32px] font-bold text-error font-display'; }
     }
     const bar = document.getElementById('exam-timer-bar');
-    if (bar) bar.style.width = `${(secs/5400)*100}%`;
+    if (bar) bar.style.width = `${(secs/examTotalSecs)*100}%`;
     if (secs <= 300 && bar) bar.className = 'h-full bg-error rounded-full';
     if (secs <= 0) {
       clearInterval(examTimerInterval);
@@ -1138,7 +1222,7 @@ function submitFullExam() {
   const chapterStats = {};
 
   quizState.questions.forEach(q => {
-    const ans = ANSWERS_DATA[q.id];
+    const ans = As()[q.id];
     if (!ans) return;
     totalPts += q.points;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
@@ -1186,7 +1270,7 @@ function submitFullExam() {
 
   // Save exam history
   const wrongIds = quizState.questions.filter(q => {
-    const ans = ANSWERS_DATA[q.id];
+    const ans = As()[q.id];
     if (!ans) return false;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
     const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
@@ -1261,7 +1345,7 @@ function retryFullExam() {
 function renderPracticeExam() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
   if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
-  const allQuestions = PRACTICE_QUESTIONS_DATA;
+  const allQuestions = PQs();
 
   if (!allQuestions.length) {
     document.getElementById('practice-exam-questions-area').innerHTML = '<p class="text-on-surface-variant">No questions available.</p>';
@@ -1281,7 +1365,7 @@ function renderPracticeExam() {
     <div class="sticky top-24 bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
       <div class="text-center mb-4">
         <p class="text-caption font-caption text-on-surface-variant tracking-wider uppercase">Time Remaining</p>
-        <p class="text-[32px] font-bold text-secondary font-display" id="practice-exam-timer">90:00</p>
+        <p class="text-[32px] font-bold text-secondary font-display" id="practice-exam-timer">${String(examMinutes()).padStart(2,'0')}:00</p>
         <div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden mt-2">
           <div class="h-full bg-secondary rounded-full" id="practice-exam-timer-bar" style="width:100%"></div>
         </div>
@@ -1327,7 +1411,7 @@ function buildPracticeQuestionsHtml(state) {
 
   let html = `<div class="mb-4">
     <h1 class="font-display text-headline-lg" style="color:#7c3aed">🎯 Bộ đề thi thử</h1>
-    <p class="text-on-surface-variant text-body-md">${allQuestions.length} câu hỏi · 90 phút · Đạt: 65%</p>
+    <p class="text-on-surface-variant text-body-md">${allQuestions.length} câu hỏi · ${examMinutes()} phút · Đạt: 65%</p>
     <div class="flex flex-wrap gap-1.5 mt-2">${chLabels}</div>
     <div class="flex flex-wrap items-center gap-2 mt-3">
       <button id="btn-practice-shuffle" class="btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold transition-all scale-98-active" style="${state.shuffled ? 'background:#eceef0;color:#7c3aed;border:2px solid #7c3aed' : 'background:#7c3aed;color:#fff;border:2px solid #7c3aed'}" onclick="shufflePracticeAnswers()">🔀 Tráo đáp án</button>
@@ -1513,7 +1597,8 @@ function onPracticeChange() {
 let practiceExamTimerInterval = null;
 function startPracticeExamTimer() {
   if (practiceExamTimerInterval) clearInterval(practiceExamTimerInterval);
-  let secs = 5400;
+  const pracTotalSecs = examMinutes() * 60;
+  let secs = pracTotalSecs;
   practiceExamTimerInterval = setInterval(() => {
     secs--;
     const m = Math.floor(secs/60), s = secs%60;
@@ -1523,7 +1608,7 @@ function startPracticeExamTimer() {
       if (secs <= 300) timer.className = 'text-[32px] font-bold text-error font-display';
     }
     const bar = document.getElementById('practice-exam-timer-bar');
-    if (bar) bar.style.width = `${(secs/5400)*100}%`;
+    if (bar) bar.style.width = `${(secs/pracTotalSecs)*100}%`;
     if (secs <= 300 && bar) bar.className = 'h-full bg-error rounded-full';
     if (secs <= 0) {
       clearInterval(practiceExamTimerInterval);
@@ -1555,7 +1640,7 @@ function submitPracticeExam() {
   const chapterStats = {};
 
   state.questions.forEach(q => {
-    const ans = PRACTICE_ANSWERS_DATA[q.id];
+    const ans = PAs()[q.id];
     if (!ans) return;
     totalPts += q.points;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
@@ -1601,7 +1686,7 @@ function submitPracticeExam() {
   const pass = pct >= 65;
 
   const wrongIds = state.questions.filter(q => {
-    const ans = PRACTICE_ANSWERS_DATA[q.id];
+    const ans = PAs()[q.id];
     if (!ans) return false;
     const u = (userAns[q.id]||[]).map(k=>k.trim().toLowerCase()).sort();
     const c = getCorrectKeys(q, ans).map(k=>k.trim().toLowerCase()).sort();
@@ -1672,7 +1757,7 @@ function retryPracticeExam() {
 
 function getPracticeKLevel(qId) {
   try {
-    var a = PRACTICE_ANSWERS_DATA[qId];
+    var a = PAs()[qId];
     if (!a || !a.kLevel) return null;
     var k = a.kLevel;
     var names = {K1:'📖 Nhớ', K2:'📗 Hiểu', K3:'🔧 Áp dụng', K4:'📊 Phân tích'};
@@ -1684,7 +1769,7 @@ function getPracticeKLevel(qId) {
 // ===== PRACTICE EXAM HISTORY =====
 function getPracticeExamHistory() {
   try {
-    const data = JSON.parse(localStorage.getItem('ctai_practice_exam_history') || '[]');
+    const data = JSON.parse(localStorage.getItem(practiceHistoryKey()) || '[]');
     return data;
   } catch(e) { return []; }
 }
@@ -1694,7 +1779,7 @@ function savePracticeExamHistory(entry) {
     let data = getPracticeExamHistory();
     data.push(entry);
     if (data.length > 10) data = data.slice(-10);
-    localStorage.setItem('ctai_practice_exam_history', JSON.stringify(data));
+    localStorage.setItem(practiceHistoryKey(), JSON.stringify(data));
   } catch(e) { console.warn('Could not save practice exam history:', e); }
 }
 
@@ -1718,7 +1803,7 @@ function renderPracticeExamHistory() {
 // ===== EXAM HISTORY =====
 function getExamHistory() {
   try {
-    const data = JSON.parse(localStorage.getItem('ctai_exam_history') || '[]');
+    const data = JSON.parse(localStorage.getItem(examHistoryKey()) || '[]');
     return data;
   } catch(e) { return []; }
 }
@@ -1728,7 +1813,7 @@ function saveExamHistory(entry) {
     const data = getExamHistory();
     data.push(entry);
     if (data.length > 10) data = data.slice(-10);
-    localStorage.setItem('ctai_exam_history', JSON.stringify(data));
+    localStorage.setItem(examHistoryKey(), JSON.stringify(data));
   } catch(e) { console.warn('Could not save exam history:', e); }
 }
 
@@ -1752,19 +1837,19 @@ function renderExamHistory() {
 // ===== QUIZ HISTORY (localStorage) =====
 function getQuizHistory(chapterNum) {
   try {
-    const data = JSON.parse(localStorage.getItem('ctai_quiz_history') || '{}');
+    const data = JSON.parse(localStorage.getItem(quizHistoryKey()) || '{}');
     return data['ch' + chapterNum] || [];
   } catch(e) { return []; }
 }
 
 function saveQuizHistory(chapterNum, entry) {
   try {
-    const data = JSON.parse(localStorage.getItem('ctai_quiz_history') || '{}');
+    const data = JSON.parse(localStorage.getItem(quizHistoryKey()) || '{}');
     const key = 'ch' + chapterNum;
     if (!data[key]) data[key] = [];
     data[key].push(entry);
     if (data[key].length > 10) data[key] = data[key].slice(-10);
-    localStorage.setItem('ctai_quiz_history', JSON.stringify(data));
+    localStorage.setItem(quizHistoryKey(), JSON.stringify(data));
   } catch(e) { console.warn('Could not save history:', e); }
 }
 
@@ -1795,11 +1880,11 @@ function showQuickPractice() {
   overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:300;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center';
 
   var items = '';
-  for (var ci = 0; ci < SYLLABUS_DATA.length; ci++) {
-    var ch = SYLLABUS_DATA[ci];
+  for (var ci = 0; ci < S().length; ci++) {
+    var ch = S()[ci];
     var cnt = 0;
-    for (var qi = 0; qi < QUESTIONS_DATA.length; qi++) {
-      if (QUESTIONS_DATA[qi].chapter === ch.chapter) cnt++;
+    for (var qi = 0; qi < Qs().length; qi++) {
+      if (Qs()[qi].chapter === ch.chapter) cnt++;
     }
     items += '<div class="flex items-center justify-between p-3 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-all" onclick="navigate(\'quiz-' + ch.chapter + '\');var el=document.getElementById(\'qp-overlay\');if(el)el.remove()">'
       + '<div><span class="font-semibold text-sm">Ch ' + ch.chapter + ':</span> <span class="text-sm">' + ch.title + '</span></div>'
@@ -1834,7 +1919,7 @@ function initSearch() {
       const q = input.value.trim().toLowerCase();
       if (q.length < 2) { results.classList.add('hidden'); return; }
       const hits = [];
-      SYLLABUS_DATA.forEach(ch => {
+      S().forEach(ch => {
         if (ch.title.toLowerCase().includes(q)) hits.push({title: ch.title, ch: ch.chapter, preview: `Chapter ${ch.chapter}`});
         (ch.sections||[]).forEach(sec => {
           if (sec.title.toLowerCase().includes(q)) hits.push({title: sec.title, ch: ch.chapter, preview: `Ch${ch.chapter} · ${sec.id}`});
@@ -1858,7 +1943,7 @@ function init() {
   renderHomePage();
   initSearch();
   handleRoute();
-  console.log(`✅ CT-AI Academy: ${SYLLABUS_DATA.length} chapters, ${QUESTIONS_DATA.length} questions`);
+  console.log(`✅ CT-AI Academy: ${S().length} chapters, ${Qs().length} questions`);
 }
 
 // Globals

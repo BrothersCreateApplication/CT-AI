@@ -140,16 +140,37 @@ var params = new URLSearchParams(window.location.search);
 var currentPage = parseInt(params.get('page')) || 1;
 var chapter = params.get('ch') || '1';
 
-var pageMap = {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63};
+// Course-aware syllabus PDF config (mirrors app.js COURSE_PROFILES).
+var CTAI_SNG = {
+  pageMap: {1:14, 2:21, 3:26, 4:38, 5:46, 6:54, 7:63},
+  chapterTitles: {1:'Introduction to AI',2:'Quality for AI',3:'Machine Learning',4:'Testing AI',5:'Input Data Testing',6:'Model Testing',7:'ML Development'},
+  pageSize: {1:7, 2:5, 3:12, 4:8, 5:8, 6:9, 7:2},
+  enFile: '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf',
+  vnFile: '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf'
+};
+var CTFL_SNG = {
+  pageMap: {1:14, 2:24, 3:32, 4:38, 5:47, 6:58},
+  chapterTitles: {1:'Fundamentals of Testing',2:'Testing Throughout the Software Development Lifecycle',3:'Static Testing',4:'Test Analysis and Design',5:'Managing the Test Activities',6:'Test Tools'},
+  pageSize: {1:10, 2:8, 3:6, 4:9, 5:11, 6:21},
+  enFile: '/ISQTB%20Foundation/ISTQB_CTFL_Syllabus_v4.0.1.pdf',
+  vnFile: '/ISQTB%20Foundation/ISTQB_CTFL_Syllabus_v4.0.1_VietNamese.pdf'
+};
+function currentCourse() {
+  var q = params.get('course');
+  if (q) return q;
+  try { return localStorage.getItem('ctai_course') || 'ct-ai'; } catch(e) { return 'ct-ai'; }
+}
+var cfg = currentCourse() === 'ct-fl' ? CTFL_SNG : CTAI_SNG;
+var pageMap = cfg.pageMap;
 var startPage = pageMap[chapter] || 14;
-var chapterTitles = {1:'Introduction to AI',2:'Quality for AI',3:'Machine Learning',4:'Testing AI',5:'Input Data Testing',6:'Model Testing',7:'ML Development'};
-var pageSize = {1:7, 2:5, 3:12, 4:8, 5:8, 6:9, 7:2};
+var chapterTitles = cfg.chapterTitles;
+var pageSize = cfg.pageSize;
 
 function loadPages() {
   var pdfPage = startPage + currentPage - 1;
   var uid = Date.now() + '-' + Math.random().toString(36).slice(2,6);
-  var enUrl = '/ISTQB-_CTAI_Syllabus_v2.0_Release.pdf?uid=' + uid + '&ch=' + chapter + '&p=' + currentPage + '#page=' + pdfPage;
-  var vnUrl = '/ISTQB-_CTAI_Syllabus_v2.0_Release_translate.pdf?uid=' + uid + '&ch=' + chapter + '&p=' + currentPage + '#page=' + pdfPage;
+  var enUrl = cfg.enFile + '?uid=' + uid + '&ch=' + chapter + '&p=' + currentPage + '#page=' + pdfPage;
+  var vnUrl = cfg.vnFile + '?uid=' + uid + '&ch=' + chapter + '&p=' + currentPage + '#page=' + pdfPage;
   var enEl = document.getElementById('en-frame');
   var vnEl = document.getElementById('vn-frame');
   // Force fresh load by toggling display
